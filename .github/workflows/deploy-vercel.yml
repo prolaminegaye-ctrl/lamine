@@ -1,0 +1,40 @@
+name: Deploy ETAGIA LMS to Vercel
+
+on:
+  push:
+    branches: [claude/make-site-functional-7if3x]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: etagia-lms
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: etagia-lms/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Deploy to Vercel
+        id: deploy
+        run: |
+          DEPLOY_URL=$(npx vercel deploy --prod --yes \
+            --token="${{ secrets.VERCEL_TOKEN }}" \
+            --env NEXT_PUBLIC_SUPABASE_URL="${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" \
+            --env NEXT_PUBLIC_SUPABASE_ANON_KEY="${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" \
+            --env ANTHROPIC_API_KEY="${{ secrets.ANTHROPIC_API_KEY }}" \
+            2>&1 | tail -1)
+          echo "url=$DEPLOY_URL" >> $GITHUB_OUTPUT
+          echo "Deployed: $DEPLOY_URL"
+
+      - name: Show URL
+        run: echo "ETAGIA LMS live at ${{ steps.deploy.outputs.url }}"
