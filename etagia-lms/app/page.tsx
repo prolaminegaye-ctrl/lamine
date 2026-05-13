@@ -11,7 +11,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
   const [error, setError] = useState('')
-  const [emailSent, setEmailSent] = useState(false)
+  const [magicSent, setMagicSent] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -20,61 +20,98 @@ export default function LoginPage() {
     const sb = createClient()
 
     if (mode === 'login') {
-      const { error } = await sb.auth.signInWithPassword({ email, password })
-      if (error) {
-        setError(error.message === 'Invalid login credentials'
-          ? 'Email ou mot de passe incorrect'
-          : error.message)
+      // Try password login first
+      const { error: pwErr } = await sb.auth.signInWithPassword({ email, password })
+      if (!pwErr) { router.push('/dashboard'); router.refresh(); return }
+
+      // If password login fails, send magic link as fallback
+      if (pwErr.message === 'Invalid login credentials') {
+        setError('Email ou mot de passe incorrect')
         setLoading(false)
         return
       }
-      router.push('/dashboard')
-      router.refresh()
-    } else {
-      const { data, error } = await sb.auth.signUp({
-        email, password,
-        options: { data: { full_name: fullName } }
-      })
-      if (error) { setError(error.message); setLoading(false); return }
 
-      // If session exists immediately → no email confirmation required
-      if (data.session) {
-        router.push('/dashboard')
-        router.refresh()
-      } else {
-        // Email confirmation required → try direct login or show message
-        const { error: loginErr } = await sb.auth.signInWithPassword({ email, password })
-        if (!loginErr) {
-          router.push('/dashboard')
-          router.refresh()
-        } else {
-          setEmailSent(true)
-          setLoading(false)
+      // Email not confirmed → send magic link
+      const { error: magicErr } = await sb.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: `${window.location.origin}/auth/callback` }
+      })
+      if (!magicErr) { setMagicSent(true); setLoading(false); return }
+      setError(pwErr.message)
+      setLoading(false)
+
+    } else {
+      // Register: signup then auto-login
+      const { data, error: signUpErr } = await sb.auth.signUp({
+        email, password,
+        options: {
+          data: { full_name: fullName },
+          emailRedirectTo: `${window.location.origin}/auth/callback`
         }
+      })
+      if (signUpErr) { setError(signUpErr.message); setLoading(false); return }
+
+      // Session exists → email confirmation disabled, go straight to dashboard
+      if (data.session) {
+        router.push('/dashboard'); router.refresh(); return
       }
+
+      // No session → send magic link so user can enter immediately
+      const { error: magicErr } = await sb.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: `${window.location.origin}/auth/callback` }
+      })
+      if (!magicErr) { setMagicSent(true); setLoading(false); return }
+
+      setError('Compte créé — vérifiez votre email pour vous connecter')
+      setLoading(false)
     }
   }
 
-  // Quick demo login
   const demoLogin = async () => {
     setLoading(true)
     setError('')
     const sb = createClient()
-    const { error } = await sb.auth.signInWithPassword({
-      email: 'demo@etagia.com', password: 'etagia2024'
-    })
+    // Try demo login
+    let { error } = await sb.auth.signInWithPassword({ email: 'demo@etagia.com', password: 'etagia2024' })
     if (error) {
-      // Try creating demo account first
-      const { error: signUpErr } = await sb.auth.signUp({
+      // Create demo account
+      const { data } = await sb.auth.signUp({
         email: 'demo@etagia.com', password: 'etagia2024',
         options: { data: { full_name: 'Demo Utilisateur' } }
       })
-      if (signUpErr) { setError('Créez un compte pour tester'); setLoading(false); return }
-      await sb.auth.signInWithPassword({ email: 'demo@etagia.com', password: 'etagia2024' })
+      if (data.session) { router.push('/dashboard'); router.refresh(); return }
+      // Try login again after signup
+      const { error: e2 } = await sb.auth.signInWithPassword({ email: 'demo@etagia.com', password: 'etagia2024' })
+      if (e2) {
+        // Send magic link for demo
+        await sb.auth.signInWithOtp({ email: 'demo@etagia.com', options: { emailRedirectTo: `${window.location.origin}/auth/callback` } })
+        setError('Vérifiez demo@etagia.com pour le lien de connexion')
+        setLoading(false)
+        return
+      }
     }
     router.push('/dashboard')
     router.refresh()
   }
+
+  if (magicSent) return (
+    <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+      <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '20px', padding: '3rem 2rem', maxWidth: '420px', width: '100%', textAlign: 'center' }}>
+        <div style={{ fontSize: '48px', marginBottom: '1rem' }}>📧</div>
+        <h2 style={{ fontSize: '20px', fontWeight: '700', marginBottom: '0.75rem' }}>Vérifiez votre email !</h2>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: '1.6', marginBottom: '1.5rem' }}>
+          Un lien de connexion magique a été envoyé à<br />
+          <strong style={{ color: 'var(--text-primary)' }}>{email}</strong><br /><br />
+          Cliquez le lien dans l&apos;email — vous serez connecté automatiquement.
+        </p>
+        <button onClick={() => setMagicSent(false)}
+          style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '10px', padding: '10px 20px', color: 'var(--text-secondary)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
+          ← Retour
+        </button>
+      </div>
+    </div>
+  )
 
   return (
     <div style={{
@@ -106,27 +143,13 @@ export default function LoginPage() {
         </div>
 
         <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '20px', padding: '2rem' }}>
-          {emailSent && (
-            <div style={{ textAlign: 'center', padding: '1rem' }}>
-              <div style={{ fontSize: '40px', marginBottom: '12px' }}>📧</div>
-              <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px' }}>Vérifiez votre email</h3>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '13px', marginBottom: '16px' }}>
-                Un lien de confirmation a été envoyé à <strong>{email}</strong>.<br />
-                Cliquez le lien dans l&apos;email puis revenez vous connecter.
-              </p>
-              <button onClick={() => { setEmailSent(false); setMode('login') }}
-                style={{ background: 'var(--accent)', border: 'none', borderRadius: '10px', padding: '10px 20px', color: '#fff', fontWeight: '600', fontSize: '14px', cursor: 'pointer' }}>
-                Aller à la connexion
-              </button>
-            </div>
-          )}
-          {!emailSent && error && (
+          {error && (
             <div style={{ background: 'rgba(240,90,90,0.12)', border: '1px solid rgba(240,90,90,0.3)', borderRadius: '10px', padding: '10px 14px', marginBottom: '1rem', fontSize: '13px', color: '#F05A5A' }}>
               {error}
             </div>
           )}
 
-          {!emailSent && <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit}>
             {mode === 'register' && (
               <div style={{ marginBottom: '1rem' }}>
                 <label style={labelStyle}>Nom complet</label>
@@ -145,17 +168,17 @@ export default function LoginPage() {
                 value={password} onChange={e => setPassword(e.target.value)} required minLength={6} />
             </div>
             <button type="submit" disabled={loading} style={btnStyle}>
-              {loading ? 'Connexion...' : mode === 'login' ? 'Se connecter' : 'Créer mon compte'}
+              {loading ? 'Chargement...' : mode === 'login' ? 'Se connecter' : 'Créer mon compte'}
             </button>
-          </form>}
+          </form>
 
-          {!emailSent && <div style={{ textAlign: 'center', marginTop: '1.25rem' }}>
+          <div style={{ textAlign: 'center', marginTop: '1.25rem' }}>
             <button onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setError('') }}
               style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
               {mode === 'login' ? 'Pas encore de compte ? ' : 'Déjà un compte ? '}
               <span style={{ color: 'var(--accent)', fontWeight: '500' }}>{mode === 'login' ? "S'inscrire" : 'Se connecter'}</span>
             </button>
-          </div>}
+          </div>
         </div>
 
         <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
