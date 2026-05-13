@@ -11,6 +11,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
   const [error, setError] = useState('')
+  const [emailSent, setEmailSent] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -20,17 +21,38 @@ export default function LoginPage() {
 
     if (mode === 'login') {
       const { error } = await sb.auth.signInWithPassword({ email, password })
-      if (error) { setError(error.message); setLoading(false); return }
+      if (error) {
+        setError(error.message === 'Invalid login credentials'
+          ? 'Email ou mot de passe incorrect'
+          : error.message)
+        setLoading(false)
+        return
+      }
+      router.push('/dashboard')
+      router.refresh()
     } else {
-      const { error } = await sb.auth.signUp({
+      const { data, error } = await sb.auth.signUp({
         email, password,
         options: { data: { full_name: fullName } }
       })
       if (error) { setError(error.message); setLoading(false); return }
-    }
 
-    router.push('/dashboard')
-    router.refresh()
+      // If session exists immediately → no email confirmation required
+      if (data.session) {
+        router.push('/dashboard')
+        router.refresh()
+      } else {
+        // Email confirmation required → try direct login or show message
+        const { error: loginErr } = await sb.auth.signInWithPassword({ email, password })
+        if (!loginErr) {
+          router.push('/dashboard')
+          router.refresh()
+        } else {
+          setEmailSent(true)
+          setLoading(false)
+        }
+      }
+    }
   }
 
   // Quick demo login
@@ -84,13 +106,27 @@ export default function LoginPage() {
         </div>
 
         <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '20px', padding: '2rem' }}>
-          {error && (
+          {emailSent && (
+            <div style={{ textAlign: 'center', padding: '1rem' }}>
+              <div style={{ fontSize: '40px', marginBottom: '12px' }}>📧</div>
+              <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px' }}>Vérifiez votre email</h3>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '13px', marginBottom: '16px' }}>
+                Un lien de confirmation a été envoyé à <strong>{email}</strong>.<br />
+                Cliquez le lien dans l&apos;email puis revenez vous connecter.
+              </p>
+              <button onClick={() => { setEmailSent(false); setMode('login') }}
+                style={{ background: 'var(--accent)', border: 'none', borderRadius: '10px', padding: '10px 20px', color: '#fff', fontWeight: '600', fontSize: '14px', cursor: 'pointer' }}>
+                Aller à la connexion
+              </button>
+            </div>
+          )}
+          {!emailSent && error && (
             <div style={{ background: 'rgba(240,90,90,0.12)', border: '1px solid rgba(240,90,90,0.3)', borderRadius: '10px', padding: '10px 14px', marginBottom: '1rem', fontSize: '13px', color: '#F05A5A' }}>
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit}>
+          {!emailSent && <form onSubmit={handleSubmit}>
             {mode === 'register' && (
               <div style={{ marginBottom: '1rem' }}>
                 <label style={labelStyle}>Nom complet</label>
@@ -111,15 +147,15 @@ export default function LoginPage() {
             <button type="submit" disabled={loading} style={btnStyle}>
               {loading ? 'Connexion...' : mode === 'login' ? 'Se connecter' : 'Créer mon compte'}
             </button>
-          </form>
+          </form>}
 
-          <div style={{ textAlign: 'center', marginTop: '1.25rem' }}>
+          {!emailSent && <div style={{ textAlign: 'center', marginTop: '1.25rem' }}>
             <button onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setError('') }}
               style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
               {mode === 'login' ? 'Pas encore de compte ? ' : 'Déjà un compte ? '}
               <span style={{ color: 'var(--accent)', fontWeight: '500' }}>{mode === 'login' ? "S'inscrire" : 'Se connecter'}</span>
             </button>
-          </div>
+          </div>}
         </div>
 
         <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
