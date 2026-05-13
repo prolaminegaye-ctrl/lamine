@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ETAGIA — LMS Intelligent</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+:root{
+  --bg:#18120D;--surface:#221A13;--surface2:#2C2118;--surface3:#38291D;
+  --border:#4A3525;--border2:#6B4C32;
+  --accent:#E8794A;--accent-dim:rgba(232,121,74,.15);--accent-h:#F08555;
+  --gold:#D4A843;--gold-s:rgba(212,168,67,.12);
+  --teal:#20D4A8;--teal-s:rgba(32,212,168,.1);
+  --text:#F5E8D8;--text2:#C4A882;--text3:#8B6845;
+  --ok:#22D3A0;--warn:#E6A817;--danger:#F06354;
+  --f:'DM Sans',system-ui,sans-serif;
+  --mono:'DM Mono',monospace;
+  --d:'Syne',system-ui,sans-serif;
+  --r:10px;--rl:16px;--sb:240px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--f);background:var(--bg);color:var(--text);font-size:14px;line-height:1.7;overflow-x:hidden}
+a{text-decoration:none;color:inherit}
+h1,h2,h3{font-family:var(--d)}
+button{cursor:pointer;font-family:var(--f)}
+input,select,textarea{font-family:var(--f)}
+
+/* ── SIDEBAR ── */
+#sidebar{
+  width:var(--sb);height:100vh;position:fixed;top:0;left:0;
+  background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow-y:auto;z-index:100;
+  padding:24px 0 32px;transition:transform .3s;
+}
+#sidebar.hidden{transform:translateX(-100%)}
+.sb-logo{padding:0 20px 24px;border-bottom:1px solid var(--border);margin-bottom:12px}
+.sb-logo .wm{font-family:var(--d);font-weight:800;font-size:22px;letter-spacing:.05em;
+  background:linear-gradient(135deg,#E8794A,#D4A843);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sb-logo .tg{font-size:10px;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-top:2px}
+.nav-label{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);padding:10px 20px 4px}
+.nav-item{
+  display:flex;align-items:center;gap:9px;padding:8px 20px;
+  color:var(--text2);font-size:13px;transition:all .2s;
+  border-left:2px solid transparent;cursor:pointer;
+}
+.nav-item:hover,.nav-item.active{color:var(--text);background:var(--accent-dim);border-left-color:var(--accent)}
+.nav-dot{width:6px;height:6px;border-radius:50%;background:var(--text3);flex-shrink:0;transition:background .2s}
+.nav-item:hover .nav-dot,.nav-item.active .nav-dot{background:var(--accent)}
+.sb-bottom{margin-top:auto;padding:16px 20px 0;border-top:1px solid var(--border)}
+.sb-user{display:flex;align-items:center;gap:10px}
+.sb-av{width:34px;height:34px;border-radius:50%;background:var(--accent-dim);border:1px solid var(--accent);
+  display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--accent);flex-shrink:0}
+.sb-uname{font-size:13px;font-weight:600;color:var(--text)}
+.sb-role{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
+.sb-logout{background:transparent;border:none;color:var(--text3);font-size:11px;margin-top:8px;padding:4px 0;transition:color .2s;width:100%;text-align:left}
+.sb-logout:hover{color:var(--danger)}
+
+/* ── MAIN ── */
+#main{margin-left:var(--sb);min-height:100vh;display:flex;flex-direction:column}
+#topbar{
+  position:sticky;top:0;background:rgba(24,18,13,.9);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);padding:0 32px;height:58px;
+  display:flex;align-items:center;justify-content:space-between;z-index:50;
+}
+.tb-title{font-family:var(--d);font-size:16px;font-weight:700;color:var(--text)}
+.tb-right{display:flex;align-items:center;gap:12px}
+.tb-search{
+  background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);
+  padding:6px 14px;color:var(--text);font-size:13px;outline:none;width:220px;
+}
+.tb-search:focus{border-color:var(--accent)}
+.tb-search::placeholder{color:var(--text3)}
+.hamburger{display:none;background:transparent;border:none;color:var(--text2);font-size:20px;padding:4px 8px}
+
+#content{flex:1;padding:32px}
+
+/* ── AUTH PAGES ── */
+.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);padding:20px}
+.auth-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);
+  padding:40px;width:100%;max-width:420px;
+}
+.auth-logo{text-align:center;margin-bottom:28px}
+.auth-logo .wm{font-family:var(--d);font-weight:800;font-size:28px;
+  background:linear-gradient(135deg,#E8794A,#D4A843);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.auth-logo p{font-size:12px;color:var(--text3);margin-top:4px}
+.auth-card h2{font-size:20px;font-weight:700;margin-bottom:6px}
+.auth-card p.sub{font-size:13px;color:var(--text2);margin-bottom:24px}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase}
+.form-input{
+  width:100%;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--r);color:var(--text);font-size:14px;outline:none;transition:border-color .2s;
+}
+.form-input:focus{border-color:var(--accent)}
+.form-input.error{border-color:var(--danger)}
+.form-err{font-size:11px;color:var(--danger);margin-top:4px;display:none}
+.form-err.show{display:block}
+.btn{padding:11px 22px;border-radius:var(--r);border:none;font-size:14px;font-weight:600;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:var(--accent-h);transform:translateY(-1px)}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text2)}.btn-outline:hover{border-color:var(--accent);color:var(--text)}
+.btn-sm{padding:7px 14px;font-size:12px}
+.btn-full{width:100%;justify-content:center}
+.btn-danger{background:rgba(240,99,84,.12);color:var(--danger);border:1px solid rgba(240,99,84,.3)}.btn-danger:hover{background:rgba(240,99,84,.2)}
+.auth-switch{text-align:center;margin-top:20px;font-size:13px;color:var(--text3)}
+.auth-switch a{color:var(--accent);cursor:pointer}
+
+/* ── CARDS ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:24px;transition:border-color .2s}
+.card:hover{border-color:var(--border2)}
+
+/* ── COURSE CARDS ── */
+.courses-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;margin-top:24px}
+.course-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);
+  overflow:hidden;transition:all .25s;cursor:pointer;display:flex;flex-direction:column;
+}
+.course-card:hover{border-color:var(--border2);transform:translateY(-3px);box-shadow:0 16px 36px rgba(0,0,0,.4)}
+.cc-thumb{height:120px;display:flex;align-items:center;justify-content:center;font-size:52px;position:relative}
+.cc-type{position:absolute;top:10px;left:10px;padding:3px 9px;border-radius:100px;font-size:10px;font-weight:700;border:1px solid}
+.type-h5p{background:rgba(32,212,168,.1);color:var(--teal);border-color:rgba(32,212,168,.3)}
+.type-scorm{background:rgba(212,168,67,.1);color:var(--gold);border-color:rgba(212,168,67,.3)}
+.type-video{background:rgba(232,121,74,.1);color:var(--accent);border-color:rgba(232,121,74,.3)}
+.type-text{background:rgba(196,168,130,.1);color:var(--text2);border-color:rgba(196,168,130,.3)}
+.type-mixed{background:rgba(139,92,246,.1);color:#a78bfa;border-color:rgba(139,92,246,.3)}
+.cc-body{padding:18px;flex:1;display:flex;flex-direction:column;gap:8px}
+.cc-cat{font-size:10px;color:var(--accent);font-weight:700;letter-spacing:.07em;text-transform:uppercase}
+.cc-title{font-family:var(--d);font-size:15px;font-weight:700;line-height:1.3}
+.cc-meta{font-size:11px;color:var(--text3);display:flex;gap:8px;align-items:center}
+.cc-foot{padding:12px 18px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.cc-price{font-family:var(--d);font-size:16px;font-weight:700;color:var(--accent)}
+.cc-free{font-family:var(--d);font-size:14px;font-weight:700;color:var(--ok)}
+.stars{color:var(--gold);font-size:11px;letter-spacing:1px}
+
+/* ── STATS ROW ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px}
+.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:20px}
+.stat-val{font-family:var(--d);font-size:28px;font-weight:700;color:var(--accent);letter-spacing:-1px}
+.stat-lbl{font-size:12px;color:var(--text3);margin-top:4px}
+
+/* ── PROGRESS ── */
+.prog-bar{background:var(--surface3);border-radius:100px;height:6px;overflow:hidden;flex:1}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--gold));border-radius:100px;transition:width .6s ease}
+
+/* ── SECTION HEADER ── */
+.sec-tag{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+.sec-tag::before{content:'';width:14px;height:1px;background:var(--accent)}
+.sec-title{font-family:var(--d);font-size:26px;font-weight:700;letter-spacing:-.02em;margin-bottom:6px}
+.sec-sub{font-size:14px;color:var(--text2);margin-bottom:24px}
+
+/* ── FILTERS ── */
+.filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.fb{padding:6px 16px;border-radius:100px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:12px;font-weight:500;transition:all .2s}
+.fb.on,.fb:hover{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
+
+/* ── LESSON MODULE LIST ── */
+.mod-block{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-bottom:12px}
+.mod-header{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:background .2s}
+.mod-header:hover{background:var(--surface2)}
+.mod-title{font-family:var(--d);font-size:14px;font-weight:600}
+.mod-lessons{border-top:1px solid var(--border)}
+.lesson-row{
+  display:flex;align-items:center;gap:12px;padding:11px 20px;
+  border-bottom:1px solid var(--border);cursor:pointer;transition:background .2s;
+}
+.lesson-row:last-child{border-bottom:none}
+.lesson-row:hover{background:var(--surface2)}
+.lesson-icon{font-size:16px;width:24px;text-align:center;flex-shrink:0}
+.lesson-title{flex:1;font-size:13px}
+.lesson-dur{font-size:11px;color:var(--text3)}
+.lesson-status{font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px}
+.ls-done{background:rgba(34,211,160,.1);color:var(--ok);border:1px solid rgba(34,211,160,.3)}
+.ls-lock{background:var(--surface3);color:var(--text3);border:1px solid var(--border)}
+.ls-avail{background:var(--accent-dim);color:var(--accent);border:1px solid rgba(232,121,74,.3)}
+
+/* ── PLAYER ── */
+.player-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden}
+.player-header{padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.player-body{padding:24px}
+.player-iframe{width:100%;height:500px;border:none;border-radius:var(--r);background:#000}
+.player-text{max-width:720px;line-height:1.8;color:var(--text2)}
+.player-text h1,.player-text h2,.player-text h3{color:var(--text);font-family:var(--d);margin:20px 0 10px}
+.player-text p{margin-bottom:14px}
+.player-nav{display:flex;justify-content:space-between;align-items:center;margin-top:24px;padding-top:20px;border-top:1px solid var(--border)}
+
+/* ── AI TUTOR ── */
+.chat-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);display:flex;flex-direction:column;height:calc(100vh - 160px)}
+.chat-hdr{padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.chat-av{width:36px;height:36px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;font-family:var(--d)}
+.chat-msgs{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:14px}
+.chat-msgs::-webkit-scrollbar{width:4px}
+.chat-msgs::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.msg{display:flex;gap:10px;align-items:flex-start}
+.msg.user{flex-direction:row-reverse}
+.msg-av{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.ai-av{background:var(--accent-dim);border:1px solid rgba(232,121,74,.3);color:var(--accent)}
+.user-av{background:var(--surface3);color:var(--text2)}
+.bubble{padding:10px 14px;border-radius:14px;max-width:82%;font-size:13px;line-height:1.6}
+.ai-bubble{background:var(--surface2);border:1px solid var(--border);border-bottom-left-radius:4px}
+.user-bubble{background:var(--accent-dim);border:1px solid rgba(232,121,74,.3);border-bottom-right-radius:4px;color:var(--text2)}
+.chat-in{border-top:1px solid var(--border);padding:16px 20px;display:flex;gap:10px}
+.chat-input{flex:1;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-size:13px;outline:none}
+.chat-input:focus{border-color:var(--accent)}
+.chat-send{width:38px;height:38px;border-radius:var(--r);background:var(--accent);border:none;color:#fff;font-size:17px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.chat-send:hover{background:var(--accent-h)}
+.ai-tag{font-size:10px;color:var(--text3);margin-top:4px;font-family:var(--mono)}
+
+/* ── QUIZ ── */
+.quiz-q{background:var(--surface2);border:1px solid var(--border);border-radius:var(--rl);padding:24px;margin-bottom:14px}
+.quiz-q .qnum{font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:10px}
+.quiz-q .qtext{font-size:15px;font-weight:600;margin-bottom:16px;line-height:1.5}
+.opt{
+  display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid var(--border);
+  border-radius:var(--r);margin-bottom:8px;cursor:pointer;transition:all .2s;font-size:13px;
+}
+.opt:hover{border-color:var(--accent);background:var(--accent-dim)}
+.opt.selected{border-color:var(--accent);background:var(--accent-dim);color:var(--accent)}
+.opt.correct{border-color:var(--ok);background:rgba(34,211,160,.1);color:var(--ok)}
+.opt.wrong{border-color:var(--danger);background:rgba(240,99,84,.08);color:var(--danger)}
+.opt input{accent-color:var(--accent)}
+
+/* ── TOAST ── */
+.toast-wrap{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:8px;z-index:9999}
+.toast{
+  padding:12px 18px;border-radius:var(--r);font-size:13px;font-weight:500;min-width:260px;
+  animation:toastIn .3s ease;display:flex;align-items:center;gap:8px;
+  box-shadow:0 8px 24px rgba(0,0,0,.4);
+}
+.toast-ok{background:rgba(34,211,160,.15);border:1px solid rgba(34,211,160,.3);color:var(--ok)}
+.toast-err{background:rgba(240,99,84,.12);border:1px solid rgba(240,99,84,.3);color:var(--danger)}
+.toast-info{background:var(--accent-dim);border:1px solid rgba(232,121,74,.3);color:var(--accent)}
+@keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+
+/* ── MODAL ── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .25s}
+.modal-bg.open{opacity:1;pointer-events:all}
+.modal-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:32px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;position:relative;transform:translateY(14px);transition:transform .25s}
+.modal-bg.open .modal-box{transform:translateY(0)}
+.modal-close{position:absolute;top:14px;right:16px;background:transparent;border:none;color:var(--text3);font-size:20px;line-height:1;transition:color .2s}
+.modal-close:hover{color:var(--text)}
+
+/* ── BADGE ── */
+.badge{display:inline-block;padding:2px 9px;border-radius:100px;font-size:10px;font-weight:700;letter-spacing:.05em}
+.badge-learner{background:var(--accent-dim);color:var(--accent);border:1px solid rgba(232,121,74,.3)}
+.badge-teacher{background:var(--teal-s);color:var(--teal);border:1px solid rgba(32,212,168,.3)}
+.badge-admin{background:var(--gold-s);color:var(--gold);border:1px solid rgba(212,168,67,.3)}
+.badge-cert{background:var(--gold-s);color:var(--gold);border:1px solid rgba(212,168,67,.3)}
+.badge-new{background:rgba(34,211,160,.1);color:var(--ok);border:1px solid rgba(34,211,160,.3)}
+
+/* ── TABLE ── */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{padding:10px 14px;text-align:left;font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border);background:var(--surface2)}
+.tbl td{padding:11px 14px;font-size:13px;color:var(--text2);border-bottom:1px solid var(--border)}
+.tbl tr:hover td{background:var(--surface2)}
+
+/* ── CALLOUT ── */
+.callout{border-left:3px solid var(--accent);padding:14px 18px;background:var(--accent-dim);border-radius:0 var(--r) var(--r) 0;font-size:13px;color:var(--text2);margin:16px 0}
+.callout.teal{border-left-color:var(--teal);background:var(--teal-s)}
+.callout.gold{border-left-color:var(--gold);background:var(--gold-s)}
+
+/* ── SPINNER ── */
+.spin{display:inline-block;width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading{display:flex;align-items:center;justify-content:center;padding:60px;gap:12px;color:var(--text3)}
+
+/* ── SCORM BADGE ── */
+.content-badge{
+  display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:100px;
+  font-size:11px;font-weight:600;border:1px solid;
+}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:60px 20px;color:var(--text3)}
+.empty .big{font-size:48px;margin-bottom:12px}
+.empty p{font-size:14px;margin-bottom:20px}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  #sidebar{transform:translateX(-100%)}
+  #sidebar.open{transform:translateX(0)}
+  #main{margin-left:0}
+  .hamburger{display:block}
+  .stats-row{grid-template-columns:1fr 1fr}
+  .tb-search{display:none}
+}
+@media(max-width:600px){
+  .courses-grid{grid-template-columns:1fr}
+  .stats-row{grid-template-columns:1fr}
+  #content{padding:16px}
+}
+</style>
+</head>
+<body>
+
+<div id="toast-wrap" class="toast-wrap"></div>
+
+<!-- MODAL -->
+<div id="modal" class="modal-bg">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<!-- AUTH PAGES (shown when not logged in) -->
+<div id="auth-page" style="display:none"></div>
+
+<!-- APP (shown when logged in) -->
+<div id="app" style="display:none">
+  <nav id="sidebar">
+    <div class="sb-logo">
+      <div class="wm">ETAGIA</div>
+      <div class="tg">LMS Intelligent · EdTech Africa</div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Principal</div>
+      <div class="nav-item" data-route="/" onclick="nav(this)"><span class="nav-dot"></span>🏠 Dashboard</div>
+      <div class="nav-item" data-route="/courses" onclick="nav(this)"><span class="nav-dot"></span>📚 Catalogue</div>
+      <div class="nav-item" data-route="/progress" onclick="nav(this)"><span class="nav-dot"></span>📈 Ma progression</div>
+      <div class="nav-item" data-route="/ai-tutor" onclick="nav(this)"><span class="nav-dot"></span>🤖 AI Tuteur</div>
+    </div>
+    <div class="nav-section" id="nav-teacher" style="display:none">
+      <div class="nav-label">Formateur</div>
+      <div class="nav-item" data-route="/teacher" onclick="nav(this)"><span class="nav-dot"></span>✏️ Studio Créateur</div>
+    </div>
+    <div class="nav-section" id="nav-admin" style="display:none">
+      <div class="nav-label">Administration</div>
+      <div class="nav-item" data-route="/admin" onclick="nav(this)"><span class="nav-dot"></span>⚙️ Admin Panel</div>
+    </div>
+    <div class="sb-bottom">
+      <div class="sb-user">
+        <div class="sb-av" id="sb-av">?</div>
+        <div>
+          <div class="sb-uname" id="sb-name">Utilisateur</div>
+          <div class="sb-role" id="sb-role">learner</div>
+        </div>
+      </div>
+      <button class="sb-logout" onclick="logout()">⏻ Déconnexion</button>
+    </div>
+  </nav>
+
+  <div id="main">
+    <div id="topbar">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="hamburger" onclick="toggleSidebar()">☰</button>
+        <div class="tb-title" id="page-title">Dashboard</div>
+      </div>
+      <div class="tb-right">
+        <input class="tb-search" type="search" placeholder="Rechercher un cours..." id="tb-search" oninput="handleSearch(this.value)">
+        <div style="font-size:18px;cursor:pointer;color:var(--text3)">🔔</div>
+      </div>
+    </div>
+    <div id="content"><div class="loading"><div class="spin"></div> Chargement...</div></div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ──
+const SB_URL = 'https://taimtpltpaxugfcmwsux.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRhaW10cGx0cGF4dWdmY213c3V4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwODg2NjQsImV4cCI6MjA5MzY2NDY2NH0.CxGX4CetHYhb-FqN6LWZlm0VS4PevUdc6p9IGPQe-Ow';
+const sb = supabase.createClient(SB_URL, SB_KEY);
+
+let _user = null, _profile = null, _chatSession = null;
+
+// ── DEMO DATA ──
+const DEMO_COURSES = [
+  {title:"Introduction à l'IA Générative",description:"Maîtriser ChatGPT, Claude et les outils IA pour booster votre productivité au quotidien.",thumbnail_emoji:"🤖",thumbnail_color:"#1C1410",category:"Intelligence Artificielle",level:"beginner",content_type:"mixed",duration_hours:8,is_certified:true,price_fcfa:0,status:"published",rating:4.9,learners_count:1247,tags:["IA","Productivité","Gratuit"]},
+  {title:"Marketing Digital en Afrique",description:"Stratégies réseaux sociaux, SEO et publicité digitale adaptées au marché africain.",thumbnail_emoji:"📊",thumbnail_color:"#1A180A",category:"Marketing",level:"intermediate",content_type:"video",duration_hours:12,is_certified:true,price_fcfa:25000,status:"published",rating:4.8,learners_count:892,tags:["Marketing","Afrique"]},
+  {title:"SCORM & e-Learning Standards",description:"Créer et déployer des formations SCORM 1.2 conformes aux standards internationaux.",thumbnail_emoji:"📦",thumbnail_color:"#1A1408",category:"EdTech",level:"intermediate",content_type:"scorm",duration_hours:6,is_certified:false,price_fcfa:0,status:"published",rating:4.7,learners_count:456,tags:["SCORM","LMS","Gratuit"]},
+  {title:"Contenu Interactif H5P",description:"Concevoir des quiz, vidéos interactives et présentations H5P engageantes.",thumbnail_emoji:"🎮",thumbnail_color:"#0F1A18",category:"EdTech",level:"beginner",content_type:"h5p",duration_hours:4,is_certified:false,price_fcfa:0,status:"published",rating:4.6,learners_count:334,tags:["H5P","Interactif","Gratuit"]},
+  {title:"Entrepreneuriat & Startup Afrique",description:"De l'idée au business plan : lancer sa startup en Afrique francophone.",thumbnail_emoji:"💼",thumbnail_color:"#1A1208",category:"Entrepreneuriat",level:"all",content_type:"mixed",duration_hours:16,is_certified:true,price_fcfa:35000,status:"published",rating:4.9,learners_count:2103,tags:["Startup","Business","Afrique"]},
+  {title:"Comptabilité SYSCOHADA",description:"Maîtrise complète du système comptable OHADA pour les professionnels africains.",thumbnail_emoji:"🧮",thumbnail_color:"#1A0C0C",category:"Comptabilité",level:"advanced",content_type:"text",duration_hours:24,is_certified:true,price_fcfa:45000,status:"published",rating:4.8,learners_count:1567,tags:["SYSCOHADA","OHADA","Certifiant"]}
+];
+
+// ── TOAST ──
+function toast(msg, type='info'){
+  const w=document.getElementById('toast-wrap');
+  const t=document.createElement('div');
+  t.className=`toast toast-${type}`;
+  t.innerHTML=(type==='ok'?'✓ ':type==='err'?'✗ ':'ℹ ')+msg;
+  w.appendChild(t);
+  setTimeout(()=>t.remove(),3500);
+}
+
+// ── MODAL ──
+function openModal(html){
+  document.getElementById('modal-content').innerHTML=html;
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(){document.getElementById('modal').classList.remove('open')}
+document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal') closeModal()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape') closeModal()});
+
+// ── SIDEBAR ──
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open')}
+function nav(el){
+  const route = el.dataset.route;
+  document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+  el.classList.add('active');
+  route$(route);
+}
+function setActiveNav(route){
+  document.querySelectorAll('.nav-item').forEach(el=>{
+    el.classList.toggle('active', el.dataset.route===route || (route.startsWith(el.dataset.route) && el.dataset.route!='/'));
+  });
+}
+
+// ── ROUTER ──
+function route$(path){
+  window.location.hash='#'+path;
+}
+function getRoute(){
+  const h=window.location.hash.replace('#','') || '/';
+  return h;
+}
+async function renderRoute(){
+  if(!_user){showAuth('login');return}
+  const route=getRoute();
+  const c=document.getElementById('content');
+  setActiveNav(route);
+  if(route==='/'||route==='') {await renderDashboard(c); document.getElementById('page-title').textContent='Dashboard';}
+  else if(route==='/courses'){await renderCourses(c); document.getElementById('page-title').textContent='Catalogue'}
+  else if(route==='/ai-tutor'){renderAITutor(c); document.getElementById('page-title').textContent='AI Tuteur'}
+  else if(route==='/progress'){await renderProgress(c); document.getElementById('page-title').textContent='Ma Progression'}
+  else if(route==='/teacher'){await renderTeacher(c); document.getElementById('page-title').textContent='Studio Créateur'}
+  else if(route==='/admin'){await renderAdmin(c); document.getElementById('page-title').textContent='Administration'}
+  else if(route.startsWith('/course/')){
+    const id=route.split('/')[2];
+    await renderCourseDetail(c,id); document.getElementById('page-title').textContent='Détail du cours';
+  }
+  else if(route.startsWith('/learn/')){
+    const parts=route.split('/');
+    await renderLesson(c,parts[2],parts[3]); document.getElementById('page-title').textContent='Lecteur';
+  }
+  else{c.innerHTML='<div class="empty"><div class="big">404</div><p>Page introuvable</p></div>'}
+}
+window.addEventListener('hashchange',renderRoute);
+
+// ── AUTH ──
+function showAuth(page){
+  document.getElementById('app').style.display='none';
+  document.getElementById('auth-page').style.display='block';
+  if(page==='login') renderLogin();
+  else renderRegister();
+}
+function showApp(){
+  document.getElementById('auth-page').style.display='none';
+  document.getElementById('app').style.display='flex';
+  updateSidebar();
+  renderRoute();
+}
+function renderLogin(){
+  document.getElementById('auth-page').innerHTML=`
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo"><div class="wm">ETAGIA</div><p>LMS Intelligent · Plateforme EdTech</p></div>
+      <h2>Connexion</h2><p class="sub">Accédez à votre espace d'apprentissage</p>
+      <div class="form-group"><label>Email</label><input id="l-email" class="form-input" type="email" placeholder="votre@email.com"></div>
+      <div class="form-group"><label>Mot de passe</label><input id="l-pwd" class="form-input" type="password" placeholder="••••••••"></div>
+      <div id="l-err" class="form-err"></div>
+      <button class="btn btn-primary btn-full" style="margin-top:8px" onclick="doLogin()">Se connecter →</button>
+      <div class="auth-switch">Pas encore de compte ? <a onclick="renderRegister()">S'inscrire gratuitement</a></div>
+    </div>
+  </div>`;
+}
+function renderRegister(){
+  document.getElementById('auth-page').innerHTML=`
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo"><div class="wm">ETAGIA</div><p>Rejoignez 52 000+ apprenants africains</p></div>
+      <h2>Créer un compte</h2><p class="sub">Gratuit · Commence en 30 secondes</p>
+      <div class="form-group"><label>Nom complet</label><input id="r-name" class="form-input" placeholder="Prénom Nom"></div>
+      <div class="form-group"><label>Email</label><input id="r-email" class="form-input" type="email" placeholder="votre@email.com"></div>
+      <div class="form-group"><label>Mot de passe</label><input id="r-pwd" class="form-input" type="password" placeholder="Min. 6 caractères"></div>
+      <div class="form-group"><label>Pays</label>
+        <select id="r-country" class="form-input">
+          <option value="">Sélectionner...</option>
+          <option>Sénégal</option><option>Cameroun</option><option>Côte d'Ivoire</option>
+          <option>Mali</option><option>Burkina Faso</option><option>Niger</option><option>Guinée</option>
+          <option>Togo</option><option>Bénin</option><option>Gabon</option><option>Congo</option>
+          <option>RD Congo</option><option>Madagascar</option><option>Rwanda</option><option>France</option><option>Autre</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Je suis</label>
+        <select id="r-role" class="form-input">
+          <option value="learner">Apprenant</option>
+          <option value="teacher">Formateur / Enseignant</option>
+        </select>
+      </div>
+      <div id="r-err" class="form-err"></div>
+      <button class="btn btn-primary btn-full" style="margin-top:8px" onclick="doRegister()">Créer mon compte →</button>
+      <div class="auth-switch">Déjà un compte ? <a onclick="renderLogin()">Se connecter</a></div>
+    </div>
+  </div>`;
+}
+async function doLogin(){
+  const email=document.getElementById('l-email').value.trim();
+  const pwd=document.getElementById('l-pwd').value;
+  const err=document.getElementById('l-err');
+  if(!email||!pwd){err.textContent='Remplissez tous les champs';err.classList.add('show');return}
+  const btn=document.querySelector('#auth-page .btn-primary');
+  btn.innerHTML='<div class="spin" style="width:16px;height:16px"></div>';btn.disabled=true;
+  const {data,error}=await sb.auth.signInWithPassword({email,password:pwd});
+  if(error){err.textContent=error.message;err.classList.add('show');btn.innerHTML='Se connecter →';btn.disabled=false;return}
+  _user=data.user;
+  await loadProfile();
+  showApp();
+}
+async function doRegister(){
+  const name=document.getElementById('r-name').value.trim();
+  const email=document.getElementById('r-email').value.trim();
+  const pwd=document.getElementById('r-pwd').value;
+  const country=document.getElementById('r-country').value;
+  const role=document.getElementById('r-role').value;
+  const err=document.getElementById('r-err');
+  if(!name||!email||!pwd){err.textContent='Remplissez tous les champs';err.classList.add('show');return}
+  if(pwd.length<6){err.textContent='Mot de passe trop court (min 6)';err.classList.add('show');return}
+  const btn=document.querySelector('#auth-page .btn-primary');
+  btn.innerHTML='<div class="spin" style="width:16px;height:16px"></div>';btn.disabled=true;
+  const {data,error}=await sb.auth.signUp({email,password:pwd,options:{data:{full_name:name}}});
+  if(error){err.textContent=error.message;err.classList.add('show');btn.innerHTML='Créer mon compte →';btn.disabled=false;return}
+  _user=data.user;
+  // Update profile with country + role
+  await sb.from('profiles').upsert({id:_user.id,full_name:name,country,role});
+  await loadProfile();
+  await seedIfNeeded();
+  toast('Bienvenue sur ETAGIA ! 🎓','ok');
+  showApp();
+}
+async function logout(){
+  await sb.auth.signOut();
+  _user=null;_profile=null;
+  window.location.hash='';
+  showAuth('login');
+}
+async function loadProfile(){
+  if(!_user) return;
+  const {data}=await sb.from('profiles').select('*').eq('id',_user.id).single();
+  _profile=data;
+  // Create profile if trigger didn't fire
+  if(!_profile){
+    await sb.from('profiles').upsert({id:_user.id,full_name:_user.user_metadata?.full_name||_user.email?.split('@')[0],role:'learner'});
+    const {data:d2}=await sb.from('profiles').select('*').eq('id',_user.id).single();
+    _profile=d2;
+  }
+}
+function updateSidebar(){
+  if(!_profile) return;
+  const n=_profile.full_name||'Utilisateur';
+  document.getElementById('sb-av').textContent=n.charAt(0).toUpperCase();
+  document.getElementById('sb-name').textContent=n;
+  document.getElementById('sb-role').textContent=_profile.role||'learner';
+  if(_profile.role==='teacher'||_profile.role==='admin') document.getElementById('nav-teacher').style.display='';
+  if(_profile.role==='admin') document.getElementById('nav-admin').style.display='';
+}
+
+// ── SEED ──
+async function seedIfNeeded(){
+  if(localStorage.getItem('etagia_seeded_v2')) return;
+  try{
+    // Create demo org
+    const {data:org}=await sb.from('organizations').insert({name:'ETAGIA Demo',slug:'etagia-demo-'+Date.now()}).select().single();
+    if(!org) return;
+    for(const course of DEMO_COURSES){
+      const {data:c}=await sb.from('courses').insert({...course,org_id:org.id}).select().single();
+      if(!c) continue;
+      const {data:m1}=await sb.from('course_modules').insert({course_id:c.id,title:'Module 1 — Fondamentaux',order_index:0}).select().single();
+      const {data:m2}=await sb.from('course_modules').insert({course_id:c.id,title:'Module 2 — Pratique & Évaluation',order_index:1}).select().single();
+      if(!m1||!m2) continue;
+      await sb.from('lessons').insert([
+        {module_id:m1.id,course_id:c.id,title:'Introduction & Objectifs',content_type:'text',content:{html_content:`<h2>Bienvenue dans ce cours !</h2><p>Ce module vous présente les concepts fondamentaux de <strong>${c.title}</strong>.</p><p>ETAGIA utilise une approche pédagogique adaptative basée sur vos performances et votre style d'apprentissage unique.</p><h3>Ce que vous allez apprendre</h3><ul><li>Les bases essentielles du domaine</li><li>Les meilleures pratiques reconnues</li><li>Des exercices pratiques adaptés au contexte africain</li></ul><p>Bonne formation ! 🚀</p>`},duration_minutes:5,order_index:0,is_free_preview:true},
+        {module_id:m1.id,course_id:c.id,title:'Contenu Interactif H5P',content_type:'h5p',content:{h5p_url:'https://h5p.org/h5p/embed/617'},duration_minutes:15,order_index:1},
+        {module_id:m2.id,course_id:c.id,title:'Module SCORM 1.2 — Pratique',content_type:'scorm',content:{scorm_version:'1.2'},duration_minutes:20,order_index:0},
+        {module_id:m2.id,course_id:c.id,title:'Quiz de validation',content_type:'quiz',content:{},duration_minutes:10,order_index:1}
+      ]);
+      // Create quiz
+      const {data:quiz}=await sb.from('quizzes').insert({course_id:c.id,title:`Quiz — ${c.title}`,passing_score:70}).select().single();
+      if(quiz){
+        await sb.from('quiz_questions').insert([
+          {quiz_id:quiz.id,question_text:`Quelle est la principale caractéristique de "${c.title}" ?`,question_type:'mcq',options:JSON.stringify([{id:'a',text:'Elle est uniquement théorique',is_correct:false},{id:'b',text:'Elle combine théorie et pratique contextualisée',is_correct:true},{id:'c',text:'Elle est destinée aux experts uniquement',is_correct:false}]),correct_answer:'b',explanation:'Cette formation combine approche théorique et cas pratiques contextualisés au marché africain.',order_index:0},
+          {quiz_id:quiz.id,question_text:'ETAGIA est une plateforme orientée vers :',question_type:'mcq',options:JSON.stringify([{id:'a',text:'Les marchés exclusivement européens',is_correct:false},{id:'b',text:'Les apprenants africains et marchés émergents',is_correct:true},{id:'c',text:'Uniquement les grandes entreprises',is_correct:false}]),correct_answer:'b',explanation:'ETAGIA est conçue pour les réalités africaines et les marchés émergents.',order_index:1},
+          {quiz_id:quiz.id,question_text:'Vrai ou Faux : ETAGIA supporte le mode offline.',question_type:'true_false',options:JSON.stringify([{id:'true',text:'Vrai',is_correct:true},{id:'false',text:'Faux',is_correct:false}]),correct_answer:'true',explanation:'ETAGIA est une PWA offline-first conçue pour les zones à faible connectivité.',order_index:2}
+        ]);
+      }
+    }
+    localStorage.setItem('etagia_seeded_v2','1');
+    toast('Données de démo chargées ✓','ok');
+  }catch(e){console.warn('Seed error:',e)}
+}
+
+// ── DASHBOARD ──
+async function renderDashboard(c){
+  c.innerHTML='<div class="loading"><div class="spin"></div></div>';
+  const [enrollRes,courseRes]=await Promise.all([
+    sb.from('enrollments').select('*,courses(*)').eq('user_id',_user.id).order('last_accessed',{ascending:false}).limit(6),
+    sb.from('courses').select('*').eq('status','published').limit(6)
+  ]);
+  const enrolls=enrollRes.data||[];
+  const allCourses=courseRes.data||[];
+  const enrolled_ids=enrolls.map(e=>e.course_id);
+  const recommended=allCourses.filter(c=>!enrolled_ids.includes(c.id)).slice(0,3);
+  const totalXP=(_profile?.total_xp||0);
+  const streak=(_profile?.streak_days||0);
+  const certs=enrolls.filter(e=>e.completed_at).length;
+
+  c.innerHTML=`
+  <div class="sec-tag">Dashboard</div>
+  <h2 class="sec-title">Bonjour, ${_profile?.full_name||'Apprenant'} 👋</h2>
+  <p class="sec-sub" style="margin-bottom:20px">Continuez votre parcours d'apprentissage — <span style="color:var(--accent)">${streak} jour${streak>1?'s':''} de streak 🔥</span></p>
+
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-val">${enrolls.length}</div><div class="stat-lbl">Cours inscrits</div></div>
+    <div class="stat-box"><div class="stat-val">${enrolls.filter(e=>e.progress>=100).length}</div><div class="stat-lbl">Cours terminés</div></div>
+    <div class="stat-box"><div class="stat-val">${certs}</div><div class="stat-lbl">Certificats</div></div>
+    <div class="stat-box"><div class="stat-val">${totalXP}</div><div class="stat-lbl">Points XP</div></div>
+  </div>
+
+  ${enrolls.length>0?`
+  <div class="sec-tag" style="margin-top:8px">Continuer</div>
+  <h3 style="font-family:var(--d);font-size:18px;margin-bottom:16px">Reprendre là où vous en êtes</h3>
+  <div class="courses-grid" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr))">
+    ${enrolls.slice(0,4).map(e=>courseCard(e.courses,e.progress,true)).join('')}
+  </div>`:''}
+
+  <div class="sec-tag" style="margin-top:32px">Recommandés</div>
+  <h3 style="font-family:var(--d);font-size:18px;margin-bottom:16px">Formations suggérées pour vous</h3>
+  ${recommended.length>0?`<div class="courses-grid">${recommended.map(c=>courseCard(c,null,false)).join('')}</div>`:
+  `<div class="callout">Le catalogue est en cours de chargement. <a style="color:var(--accent);cursor:pointer" onclick="route$('/courses')">Voir tous les cours →</a></div>`}
+  `;
+}
+
+// ── COURSES ──
+let _allCourses=[], _activeFilter='all', _searchQ='';
+async function renderCourses(c){
+  c.innerHTML='<div class="loading"><div class="spin"></div></div>';
+  const {data}=await sb.from('courses').select('*').eq('status','published').order('learners_count',{ascending:false});
+  _allCourses=data||[];
+  if(_allCourses.length===0 && !localStorage.getItem('etagia_seeded_v2')){
+    await seedIfNeeded();
+    const {data:d2}=await sb.from('courses').select('*').eq('status','published');
+    _allCourses=d2||[];
+  }
+  renderCourseList(c);
+}
+function renderCourseList(c){
+  const filtered=_allCourses.filter(course=>{
+    const matchF=_activeFilter==='all'||course.content_type===_activeFilter||((_activeFilter==='cert')&&course.is_certified);
+    const matchS=!_searchQ||course.title.toLowerCase().includes(_searchQ)||course.category?.toLowerCase().includes(_searchQ)||(course.tags||[]).join(' ').toLowerCase().includes(_searchQ);
+    return matchF&&matchS;
+  });
+  c.innerHTML=`
+  <div class="sec-tag">Catalogue</div>
+  <h2 class="sec-title">Toutes les formations</h2>
+  <p class="sec-sub">${_allCourses.length} cours disponibles — H5P, SCORM, Vidéo et plus</p>
+  <div class="filter-row">
+    ${['all','h5p','scorm','video','text','mixed'].map(f=>`<button class="fb${_activeFilter===f?' on':''}" onclick="setFilter('${f}')">${{all:'Tout',h5p:'🎮 H5P',scorm:'📦 SCORM',video:'🎬 Vidéo',text:'📝 Texte',mixed:'📚 Mixte'}[f]}</button>`).join('')}
+    <button class="fb${_activeFilter==='cert'?' on':''}" onclick="setFilter('cert')">🏆 Certifiant</button>
+  </div>
+  ${filtered.length>0?`<div class="courses-grid">${filtered.map(c=>courseCard(c,null,false)).join('')}</div>`:
+  `<div class="empty"><div class="big">🔍</div><p>Aucun cours trouvé</p><button class="btn btn-outline" onclick="setFilter('all');document.getElementById('tb-search').value='';_searchQ=''">Effacer les filtres</button></div>`}
+  `;
+}
+function setFilter(f){_activeFilter=f;renderCourseList(document.getElementById('content'))}
+function handleSearch(v){_searchQ=v.toLowerCase();if(getRoute()==='/courses') renderCourseList(document.getElementById('content'))}
+
+// ── COURSE CARD HTML ──
+function courseCard(course,progress=null,showProgress=false){
+  if(!course) return '';
+  const typeLabels={h5p:'🎮 H5P',scorm:'📦 SCORM',video:'🎬 Vidéo',text:'📝 Texte',mixed:'📚 Mixte'};
+  const stars='★'.repeat(Math.round(course.rating||0))+'☆'.repeat(5-Math.round(course.rating||0));
+  return `<div class="course-card" onclick="route$('/course/${course.id}')">
+    <div class="cc-thumb" style="background:${course.thumbnail_color||'#1C1410'}">
+      ${course.thumbnail_emoji||'📚'}
+      <span class="cc-type type-${course.content_type||'mixed'}">${typeLabels[course.content_type||'mixed']||course.content_type}</span>
+    </div>
+    <div class="cc-body">
+      <div class="cc-cat">${course.category||'Formation'}</div>
+      <div class="cc-title">${course.title}</div>
+      <div class="cc-meta">
+        <span>${{beginner:'Débutant',intermediate:'Intermédiaire',advanced:'Avancé',all:'Tous niveaux'}[course.level]||course.level}</span>
+        <span>·</span><span>${course.duration_hours||'?'}h</span>
+        ${course.is_certified?'<span>·</span><span class="badge badge-cert">Certifiant</span>':''}
+      </div>
+      ${showProgress&&progress!==null?`<div style="display:flex;align-items:center;gap:8px;margin-top:4px"><div class="prog-bar"><div class="prog-fill" style="width:${progress}%"></div></div><span style="font-size:11px;color:var(--text3)">${Math.round(progress)}%</span></div>`:''}
+      <div class="stars">${stars}</div>
+    </div>
+    <div class="cc-foot">
+      <div class="${course.price_fcfa?'cc-price':'cc-free'}">${course.price_fcfa?course.price_fcfa.toLocaleString()+' FCFA':'Gratuit'}</div>
+      <div style="font-size:11px;color:var(--text3)">${course.learners_count||0} apprenants</div>
+    </div>
+  </div>`;
+}
+
+// ── COURSE DETAIL ──
+async function renderCourseDetail(c,courseId){
+  c.innerHTML='<div class="loading"><div class="spin"></div></div>';
+  const [{data:course},{data:modules},{data:enrollment}]=await Promise.all([
+    sb.from('courses').select('*').eq('id',courseId).single(),
+    sb.from('course_modules').select('*,lessons(*)').eq('course_id',courseId).order('order_index'),
+    sb.from('enrollments').select('*').eq('user_id',_user.id).eq('course_id',courseId).maybeSingle()
+  ]);
+  if(!course){c.innerHTML='<div class="empty"><div class="big">😕</div><p>Cours introuvable</p></div>';return}
+
+  const isEnrolled=!!enrollment;
+  const progress=enrollment?.progress||0;
+  const completedLessons=enrollment?.completed_lessons||[];
+  const typeLabels={h5p:'🎮 H5P',scorm:'📦 SCORM',video:'🎬 Vidéo',text:'📝 Texte',quiz:'❓ Quiz',pdf:'📄 PDF'};
+
+  c.innerHTML=`
+  <div style="display:grid;grid-template-columns:1fr 360px;gap:24px;align-items:start">
+    <div>
+      <div class="sec-tag"><span onclick="route$('/courses')" style="cursor:pointer">← Catalogue</span></div>
+      <div style="display:flex;align-items:center;gap:16px;margin:12px 0 20px">
+        <div style="font-size:56px;background:${course.thumbnail_color||'#1C1410'};width:80px;height:80px;border-radius:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0">${course.thumbnail_emoji||'📚'}</div>
+        <div>
+          <div class="cc-cat">${course.category||'Formation'}</div>
+          <h2 style="font-family:var(--d);font-size:24px;font-weight:800;line-height:1.2;margin:4px 0">${course.title}</h2>
+          <div class="cc-meta" style="gap:12px">${course.duration_hours||'?'}h · ${course.learners_count||0} apprenants · ⭐${course.rating||'?'} ${course.is_certified?'· <span class="badge badge-cert">Certifiant</span>':''}</div>
+        </div>
+      </div>
+      <p style="color:var(--text2);line-height:1.7;margin-bottom:24px">${course.description||''}</p>
+      <h3 style="font-family:var(--d);font-size:16px;margin-bottom:14px">Programme du cours</h3>
+      ${(modules||[]).map(mod=>`
+        <div class="mod-block">
+          <div class="mod-header" onclick="toggleMod(this)">
+            <div class="mod-title">${mod.title}</div>
+            <div style="font-size:12px;color:var(--text3)">${(mod.lessons||[]).length} leçons ▾</div>
+          </div>
+          <div class="mod-lessons" style="display:none">
+            ${(mod.lessons||[]).sort((a,b)=>a.order_index-b.order_index).map(l=>{
+              const done=completedLessons.includes(l.id);
+              return `<div class="lesson-row" onclick="route$('/learn/${courseId}/${l.id}')">
+                <div class="lesson-icon">${typeLabels[l.content_type]?.split(' ')[0]||'📄'}</div>
+                <div class="lesson-title">${l.title}<br><span style="font-size:10px;color:var(--text3)">${typeLabels[l.content_type]||l.content_type}</span></div>
+                <div class="lesson-dur">${l.duration_minutes||5} min</div>
+                <div class="lesson-status ${done?'ls-done':isEnrolled?'ls-avail':'ls-lock'}">${done?'✓ Fait':isEnrolled?'Disponible':'🔒'}</div>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>`).join('')}
+    </div>
+    <div style="position:sticky;top:78px">
+      <div class="card" style="text-align:center">
+        <div style="font-size:48px;margin-bottom:12px">${course.thumbnail_emoji||'📚'}</div>
+        ${isEnrolled?`
+          <div style="margin-bottom:16px">
+            <div style="font-size:12px;color:var(--text3);margin-bottom:6px">Votre progression : ${Math.round(progress)}%</div>
+            <div class="prog-bar" style="height:8px"><div class="prog-fill" style="width:${progress}%"></div></div>
+          </div>
+          <button class="btn btn-primary btn-full" onclick="route$('/learn/${courseId}/${modules?.[0]?.lessons?.[0]?.id||''}')">▶ Continuer</button>`:`
+          <div style="font-family:var(--d);font-size:22px;font-weight:700;color:var(--accent);margin-bottom:4px">${course.price_fcfa?course.price_fcfa.toLocaleString()+' FCFA':'Gratuit'}</div>
+          <button class="btn btn-primary btn-full" onclick="enrollCourse('${courseId}')">S'inscrire maintenant →</button>`}
+        <div style="font-size:11px;color:var(--text3);margin-top:12px">${course.duration_hours||'?'}h de contenu · Accès illimité</div>
+        ${course.is_certified?'<div class="badge badge-cert" style="margin-top:8px;display:inline-block">🏆 Certificat inclus</div>':''}
+      </div>
+    </div>
+  </div>`;
+  // Open first module
+  const firstMod=document.querySelector('.mod-header');
+  if(firstMod){firstMod.nextElementSibling.style.display=''}
+}
+function toggleMod(el){
+  const body=el.nextElementSibling;
+  body.style.display=body.style.display==='none'?'':'none';
+}
+async function enrollCourse(courseId){
+  const {error}=await sb.from('enrollments').insert({user_id:_user.id,course_id:courseId,progress:0});
+  if(error&&!error.message.includes('duplicate')){toast('Erreur: '+error.message,'err');return}
+  toast('Inscription réussie ! 🎉','ok');
+  renderCourseDetail(document.getElementById('content'),courseId);
+}
+
+// ── LESSON PLAYER ──
+async function renderLesson(c,courseId,lessonId){
+  c.innerHTML='<div class="loading"><div class="spin"></div></div>';
+  const [{data:lesson},{data:course},{data:progress},{data:allLessons}]=await Promise.all([
+    sb.from('lessons').select('*').eq('id',lessonId).single(),
+    sb.from('courses').select('*').eq('id',courseId).single(),
+    sb.from('lesson_progress').select('*').eq('user_id',_user.id).eq('lesson_id',lessonId).maybeSingle(),
+    sb.from('lessons').select('id,title,order_index,module_id').eq('course_id',courseId).order('order_index')
+  ]);
+  if(!lesson){c.innerHTML='<div class="empty"><div class="big">😕</div><p>Leçon introuvable</p></div>';return}
+  const isDone=progress?.status==='completed';
+  const typeIcons={text:'📝',video:'🎬',h5p:'🎮',scorm:'📦',quiz:'❓',pdf:'📄'};
+  const sortedLessons=allLessons||[];
+  const curIdx=sortedLessons.findIndex(l=>l.id===lessonId);
+  const nextLesson=sortedLessons[curIdx+1];
+  const prevLesson=sortedLessons[curIdx-1];
+
+  let playerHtml='';
+  switch(lesson.content_type){
+    case 'text':
+      playerHtml=`<div class="player-text">${lesson.content?.html_content||'<p>Contenu texte de la leçon.</p>'}</div>`;
+      break;
+    case 'video':
+      const videoUrl=lesson.content?.video_url||'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+      const ytId=videoUrl.match(/[?&]v=([^&]+)/)?.[1]||videoUrl.split('/').pop();
+      playerHtml=`<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:var(--r)">
+        <iframe src="https://www.youtube.com/embed/${ytId}?rel=0" class="player-iframe" style="position:absolute;top:0;left:0;width:100%;height:100%" allowfullscreen></iframe>
+      </div>`;
+      break;
+    case 'h5p':
+      const h5pUrl=lesson.content?.h5p_url||'https://h5p.org/h5p/embed/617';
+      playerHtml=`
+        <div class="callout teal" style="margin-bottom:16px">🎮 <strong>Contenu H5P Interactif</strong> — Engage avec le contenu ci-dessous. La complétion est suivie automatiquement.</div>
+        <div style="position:relative;background:#000;border-radius:var(--r);overflow:hidden">
+          <iframe src="${h5pUrl}" class="player-iframe" allowfullscreen allow="autoplay" style="height:520px"></iframe>
+        </div>
+        <script src="https://h5p.org/sites/all/modules/h5p/library/js/h5p-resizer.js" charset="UTF-8"><\/script>`;
+      break;
+    case 'scorm':
+      // Build SCORM demo blob
+      playerHtml=`
+        <div class="callout gold" style="margin-bottom:16px">📦 <strong>Module SCORM 1.2</strong> — Compléter le module pour valider la leçon. Le suivi SCORM est actif.</div>
+        <iframe id="scorm-frame" class="player-iframe" style="height:520px;background:#111;border-radius:var(--r)"></iframe>`;
+      break;
+    case 'quiz':
+      // Load quiz inline
+      playerHtml=`<div id="quiz-container"></div>`;
+      break;
+    default:
+      playerHtml=`<div class="callout">Contenu de type "${lesson.content_type}"</div>`;
+  }
+
+  c.innerHTML=`
+  <div style="max-width:860px;margin:0 auto">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+      <button class="btn btn-outline btn-sm" onclick="route$('/course/${courseId}')">← Retour au cours</button>
+      ${isDone?'<span class="badge badge-new">✓ Complété</span>':''}
+    </div>
+    <div class="player-wrap">
+      <div class="player-header">
+        <div style="font-size:20px">${typeIcons[lesson.content_type]||'📄'}</div>
+        <div>
+          <div style="font-family:var(--d);font-size:16px;font-weight:700">${lesson.title}</div>
+          <div style="font-size:11px;color:var(--text3)">${course?.title||''} · ${lesson.duration_minutes||5} min</div>
+        </div>
+        <div style="margin-left:auto">
+          <span class="content-badge type-${lesson.content_type}" style="font-size:11px;padding:4px 12px;border-radius:100px;border:1px solid">${typeIcons[lesson.content_type]} ${lesson.content_type.toUpperCase()}</span>
+        </div>
+      </div>
+      <div class="player-body">
+        ${playerHtml}
+        <div class="player-nav">
+          <div>${prevLesson?`<button class="btn btn-outline btn-sm" onclick="route$('/learn/${courseId}/${prevLesson.id}')">← Précédent</button>`:'<span></span>'}</div>
+          <button class="btn btn-primary btn-sm" id="complete-btn" onclick="markDone('${lessonId}','${courseId}','${nextLesson?.id||''}')" ${isDone?'style="background:var(--ok)"':''}>
+            ${isDone?'✓ Complété':'Marquer comme terminé →'}
+          </button>
+          <div>${nextLesson?`<button class="btn btn-outline btn-sm" onclick="route$('/learn/${courseId}/${nextLesson.id}')">Suivant →</button>`:'<span></span>'}</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+
+  // Post-render: SCORM & Quiz
+  if(lesson.content_type==='scorm'){
+    initSCORM(lessonId,courseId);
+  }
+  if(lesson.content_type==='quiz'){
+    await loadQuiz(document.getElementById('quiz-container'),lesson,courseId);
+  }
+}
+async function markDone(lessonId,courseId,nextLessonId){
+  await sb.from('lesson_progress').upsert({user_id:_user.id,lesson_id:lessonId,course_id:courseId,status:'completed',completed_at:new Date().toISOString()});
+  // Update enrollment progress
+  const {data:allLessons}=await sb.from('lessons').select('id').eq('course_id',courseId);
+  const {data:doneLessons}=await sb.from('lesson_progress').select('lesson_id').eq('user_id',_user.id).eq('course_id',courseId).eq('status','completed');
+  const progress=(doneLessons?.length||1)/(allLessons?.length||1)*100;
+  await sb.from('enrollments').upsert({user_id:_user.id,course_id:courseId,progress,last_accessed:new Date().toISOString()},{onConflict:'user_id,course_id'});
+  // XP
+  await sb.from('profiles').update({total_xp:(_profile?.total_xp||0)+10}).eq('id',_user.id);
+  _profile={..._profile,total_xp:(_profile?.total_xp||0)+10};
+  const btn=document.getElementById('complete-btn');
+  if(btn){btn.innerHTML='✓ Complété';btn.style.background='var(--ok)';}
+  toast('+10 XP · Leçon terminée ! 🎉','ok');
+  if(nextLessonId) setTimeout(()=>route$(`/learn/${courseId}/${nextLessonId}`),1200);
+}
+
+// ── SCORM PLAYER ──
+function initSCORM(lessonId,courseId){
+  const scormData={};
+  let scormCompleted=false;
+  // Inject SCORM API into window so iframe can access via parent
+  window.API={
+    LMSInitialize(s){return'true'},
+    LMSFinish(s){if(scormCompleted)markDone(lessonId,courseId,'');return'true'},
+    LMSGetValue(e){return scormData[e]||''},
+    LMSSetValue(e,v){
+      scormData[e]=v;
+      if(e==='cmi.core.lesson_status'&&(v==='completed'||v==='passed')){
+        scormCompleted=true;
+        const btn=document.getElementById('complete-btn');
+        if(btn){btn.click();}
+      }
+      return'true'
+    },
+    LMSCommit(s){return'true'},
+    LMSGetLastError(){return'0'},
+    LMSGetErrorString(e){return''},
+    LMSGetDiagnostic(e){return''}
+  };
+  // Also SCORM 2004
+  window.API_1484_11={...window.API,Initialize:window.API.LMSInitialize,Terminate:window.API.LMSFinish,GetValue:window.API.LMSGetValue,SetValue:window.API.LMSSetValue,Commit:window.API.LMSCommit,GetLastError:window.API.LMSGetLastError,GetErrorString:window.API.LMSGetErrorString,GetDiagnostic:window.API.LMSGetDiagnostic};
+
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8">
+<style>body{font-family:'DM Sans',sans-serif;background:#1a120d;color:#f5e8d8;padding:36px;max-width:640px;margin:0 auto}
+h1{background:linear-gradient(135deg,#e8794a,#d4a843);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:22px;margin-bottom:8px}
+p{color:#c4a882;margin-bottom:16px;font-size:14px;line-height:1.7}
+.q{background:#2c2118;border:1px solid #4a3525;border-radius:12px;padding:20px;margin:14px 0}
+.q strong{display:block;margin-bottom:14px;font-size:15px}
+label{display:flex;align-items:center;gap:10px;padding:9px 14px;border:1px solid #4a3525;border-radius:8px;margin-bottom:8px;cursor:pointer;font-size:13px;transition:all .2s}
+label:hover{border-color:#e8794a;background:rgba(232,121,74,.1)}
+.prog{background:#2c2118;border-radius:8px;height:10px;margin:20px 0}
+.bar{height:100%;border-radius:8px;background:linear-gradient(90deg,#e8794a,#d4a843);width:0;transition:width .5s}
+.btn{background:linear-gradient(135deg,#e8794a,#d4a843);color:#fff;border:none;padding:13px 28px;border-radius:10px;cursor:pointer;font-size:15px;font-weight:600;margin-top:10px}
+.result{text-align:center;padding:24px;background:#2c2118;border-radius:14px;margin-top:20px;display:none}
+</style></head><body>
+<h1>📦 Module SCORM 1.2 — ETAGIA</h1>
+<p>Ce module interactif utilise le standard SCORM 1.2 pour suivre votre progression automatiquement.</p>
+<div class="prog"><div class="bar" id="bar"></div></div>
+<div class="q">
+<strong>Q1. Que signifie l'acronyme SCORM ?</strong>
+<label><input type="radio" name="q1" value="a"> Système de Communication et Organisation des Ressources Multimédias</label>
+<label><input type="radio" name="q1" value="b"> Sharable Content Object Reference Model</label>
+<label><input type="radio" name="q1" value="c"> Standard Content Online Reference Method</label>
+</div>
+<div class="q">
+<strong>Q2. Quelle est la version SCORM la plus utilisée dans les LMS ?</strong>
+<label><input type="radio" name="q2" value="a"> SCORM 0.5</label>
+<label><input type="radio" name="q2" value="b"> SCORM 1.2</label>
+<label><input type="radio" name="q2" value="c"> SCORM 3.0</label>
+</div>
+<div class="q">
+<strong>Q3. H5P et SCORM sont-ils compatibles avec ETAGIA ?</strong>
+<label><input type="radio" name="q3" value="a"> Non, ETAGIA supporte uniquement SCORM</label>
+<label><input type="radio" name="q3" value="b"> Oui, ETAGIA supporte les deux formats</label>
+<label><input type="radio" name="q3" value="c"> Seulement H5P est supporté</label>
+</div>
+<button class="btn" onclick="submit()">Valider le module ✓</button>
+<div class="result" id="result"></div>
+<script>
+var API=window.parent.API;
+if(API) API.LMSInitialize('');
+function submit(){
+  var q1=document.querySelector('input[name=q1]:checked');
+  var q2=document.querySelector('input[name=q2]:checked');
+  var q3=document.querySelector('input[name=q3]:checked');
+  if(!q1||!q2||!q3){alert('Répondez à toutes les questions.');return;}
+  var score=((q1.value==='b'?1:0)+(q2.value==='b'?1:0)+(q3.value==='b'?1:0))/3*100;
+  document.getElementById('bar').style.width=score+'%';
+  var status=score>=70?'passed':'failed';
+  var r=document.getElementById('result');
+  r.style.display='block';
+  r.innerHTML='<div style="font-size:36px">'+(score>=70?'🎉':'😔')+'</div><h2 style="color:'+(score>=70?'#22D3A0':'#F06354')+'">'+Math.round(score)+'% — '+(score>=70?'Réussi !':'Insuffisant')+'</h2><p>'+(score>=70?'Excellente performance ! Le module est validé.':'Réessayez pour obtenir au moins 70%.')+'</p>';
+  if(API){
+    API.LMSSetValue('cmi.core.score.raw',Math.round(score));
+    API.LMSSetValue('cmi.core.lesson_status',status);
+    API.LMSFinish('');
+  }
+}
+<\/script></body></html>`;
+  const blob=new Blob([html],{type:'text/html'});
+  const frame=document.getElementById('scorm-frame');
+  if(frame) frame.src=URL.createObjectURL(blob);
+}
+
+// ── QUIZ ──
+async function loadQuiz(container,lesson,courseId){
+  // Find quiz linked to this lesson's course
+  const {data:quiz}=await sb.from('quizzes').select('*').eq('course_id',courseId).limit(1).single();
+  if(!quiz){container.innerHTML='<div class="callout">Quiz non trouvé pour ce cours.</div>';return}
+  const {data:questions}=await sb.from('quiz_questions').select('*').eq('quiz_id',quiz.id).order('order_index');
+  if(!questions||!questions.length){container.innerHTML='<div class="callout">Aucune question disponible.</div>';return}
+  let answers={}, submitted=false;
+  function renderQ(){
+    container.innerHTML=`
+      <div style="margin-bottom:20px">
+        <h3 style="font-family:var(--d);font-size:17px">${quiz.title}</h3>
+        <p style="font-size:13px;color:var(--text3)">Score de passage : ${quiz.passing_score}% · ${questions.length} questions</p>
+      </div>
+      ${questions.map((q,i)=>{
+        const opts=typeof q.options==='string'?JSON.parse(q.options):q.options;
+        return `<div class="quiz-q">
+          <div class="qnum">Question ${i+1}/${questions.length}</div>
+          <div class="qtext">${q.question_text}</div>
+          ${(opts||[]).map(o=>`
+            <div class="opt ${!submitted&&answers[q.id]===o.id?'selected':''} ${submitted?(o.is_correct?'correct':(answers[q.id]===o.id?'wrong':'')):''}">
+              <input type="radio" name="q_${q.id}" value="${o.id}" ${answers[q.id]===o.id?'checked':''} ${submitted?'disabled':''} onchange="quizAnswer('${q.id}','${o.id}')">
+              <span>${o.text}</span>
+            </div>`).join('')}
+          ${submitted&&q.explanation?`<div class="callout teal" style="margin-top:10px;font-size:12px">💡 ${q.explanation}</div>`:''}
+        </div>`;
+      }).join('')}
+      ${!submitted?`<button class="btn btn-primary" onclick="submitQuiz('${quiz.id}','${courseId}')">Soumettre le quiz →</button>`:
+      `<div id="quiz-result"></div>`}
+    `;
+  }
+  window.quizAnswer=(qid,oid)=>{answers[qid]=oid;};
+  window.submitQuiz=async(quizId,cid)=>{
+    const unanswered=questions.filter(q=>!answers[q.id]);
+    if(unanswered.length){toast(`Répondez à toutes les questions (${unanswered.length} restante${unanswered.length>1?'s':''})`, 'err');return}
+    submitted=true;
+    let correct=0;
+    questions.forEach(q=>{if(answers[q.id]===q.correct_answer) correct++;});
+    const score=(correct/questions.length)*100;
+    const passed=score>=quiz.passing_score;
+    await sb.from('quiz_attempts').insert({user_id:_user.id,quiz_id:quizId,answers:JSON.stringify(answers),score,passed});
+    renderQ();
+    document.getElementById('quiz-result').innerHTML=`
+      <div class="card" style="text-align:center;margin-top:20px;border-color:${passed?'var(--ok)':'var(--danger)'}">
+        <div style="font-size:48px;margin-bottom:12px">${passed?'🎉':'😔'}</div>
+        <div style="font-family:var(--d);font-size:28px;font-weight:700;color:${passed?'var(--ok)':'var(--danger)'}">${Math.round(score)}%</div>
+        <div style="font-size:16px;margin:8px 0">${passed?'Quiz réussi !':'Score insuffisant'}</div>
+        <p style="color:var(--text2);font-size:13px">${correct}/${questions.length} réponses correctes · Seuil : ${quiz.passing_score}%</p>
+        ${passed?`<button class="btn btn-primary btn-sm" style="margin-top:12px" onclick="markDone('${lesson.id}','${cid}','')">✓ Valider la leçon</button>`:`<button class="btn btn-outline btn-sm" style="margin-top:12px" onclick="location.reload()">Recommencer</button>`}
+      </div>`;
+  };
+  renderQ();
+}
+
+// ── AI TUTOR ──
+function renderAITutor(c){
+  _chatSession=crypto.randomUUID();
+  c.innerHTML=`
+  <div class="chat-wrap">
+    <div class="chat-hdr">
+      <div class="chat-av">E</div>
+      <div>
+        <div style="font-family:var(--d);font-size:14px;font-weight:700">ETAGIA AI Tuteur</div>
+        <div style="font-size:11px;color:var(--ok)">● En ligne · Répond instantanément</div>
+      </div>
+      <div style="margin-left:auto;font-size:10px;color:var(--text3);font-family:var(--mono)">Modèle: ETAGIA-Tutor-v1 · 🇪🇺 AI Act conforme</div>
+    </div>
+    <div class="chat-msgs" id="chat-msgs">
+      <div class="msg">
+        <div class="msg-av ai-av">E</div>
+        <div><div class="bubble ai-bubble">Assalamu Alaikum ! Je suis votre tuteur IA ETAGIA. Je peux vous aider avec vos formations, répondre à vos questions sur H5P, SCORM, ou vous orienter vers le bon parcours. Comment puis-je vous aider aujourd'hui ? 🎓</div>
+        <div class="ai-tag">IA · Généré automatiquement · Supervision humaine activée</div></div>
+      </div>
+    </div>
+    <div class="chat-in">
+      <input class="chat-input" id="chat-input" placeholder="Posez votre question..." onkeydown="if(event.key==='Enter')sendMsg()">
+      <button class="chat-send" onclick="sendMsg()">→</button>
+    </div>
+  </div>`;
+}
+const AI_RESPONSES={
+  scorm:["Le **SCORM** (Sharable Content Object Reference Model) est le standard international pour les contenus e-learning. ETAGIA supporte SCORM 1.2 et 2004.\n\n**Pour tester SCORM :**\n→ Rendez-vous sur un cours de type SCORM\n→ Répondez au quiz interactif\n→ Votre score est automatiquement enregistré via l'API SCORM\n\nVoulez-vous que je vous oriente vers le cours **SCORM & e-Learning Standards** ?","SCORM 1.2 définit 4 statuts possibles : `passed`, `failed`, `completed`, `incomplete`. ETAGIA lit ces valeurs depuis l'iframe via l'objet `window.API` et met à jour votre progression automatiquement. 📦"],
+  h5p:["**H5P** (HTML5 Package) permet de créer des contenus interactifs riches : quiz, vidéos interactives, présentations... \n\nDans ETAGIA, le contenu H5P est chargé via iframe depuis h5p.org ou votre propre serveur. Le script `h5p-resizer.js` assure l'adaptation de la taille automatiquement.\n\nEssayez le cours **Contenu Interactif H5P** pour le voir en action ! 🎮","H5P est parfait pour l'engagement apprenant : il permet de créer des **vidéos interactives** avec questions intégrées, des **quiz adaptatifs**, des **présentations Reveal.js**, etc. Tout cela sans programmer !"],
+  cours:["Voici les formations disponibles sur ETAGIA :\n\n🤖 **IA Générative** — Gratuit · 8h\n📊 **Marketing Digital Afrique** — 25 000 FCFA · 12h\n📦 **SCORM Standards** — Gratuit · 6h\n🎮 **H5P Interactif** — Gratuit · 4h\n💼 **Entrepreneuriat Afrique** — 35 000 FCFA · 16h\n🧮 **Comptabilité SYSCOHADA** — 45 000 FCFA · 24h\n\nPour démarrer, cliquez sur **Catalogue** dans le menu. 📚","Je recommande de commencer par les cours gratuits pour découvrir la plateforme : l'**IA Générative** ou le **Contenu H5P** sont parfaits pour débuter ! 🚀"],
+  ia:["L'**Intelligence Artificielle** transforme l'éducation. ETAGIA utilise l'IA pour :\n\n🎯 **Adaptive Learning** — parcours personnalisé selon vos résultats\n🤖 **AI Tutor** — moi-même ! Assistance pédagogique 24/7\n📊 **Analytics prédictifs** — détection précoce des difficultés\n\nNotre cours **Introduction à l'IA Générative** vous apprendra à maîtriser ChatGPT, Claude et les outils IA. Intéressé ?","L'IA générative (GPT, Claude, Gemini) peut booster votre productivité de 3x en automatisant les tâches répétitives. Le cours ETAGIA sur l'IA Générative vous guide étape par étape, avec des cas pratiques adaptés au contexte africain. 🤖"],
+  marketing:["Pour le **Marketing Digital en Afrique**, notre formation couvre :\n\n📱 Facebook/Instagram Ads pour l'Afrique\n🔍 SEO local et Google My Business\n📧 Email marketing et WhatsApp Business\n📊 Analytics et ROI mesurable\n\nLa formation est de niveau intermédiaire, 12h de contenu certifiant. Prix : 25 000 FCFA. Souhaitez-vous vous inscrire ? 📊","Le marketing en Afrique a ses spécificités : forte pénétration mobile, usage WhatsApp Business, paiement mobile money. Notre formation est conçue spécifiquement pour ces réalités ! 🌍"],
+  default:["Je suis là pour vous aider dans votre apprentissage ! Vous pouvez me poser des questions sur :\n\n📚 Les formations disponibles\n🎮 L'utilisation de H5P\n📦 L'intégration SCORM\n🤖 L'IA et ses applications\n💡 Votre parcours personnalisé\n\nQuelle est votre question ? 😊","Excellente question ! ETAGIA est une plateforme LMS de nouvelle génération, pensée pour les réalités africaines. Si vous avez une question spécifique sur une formation ou une fonctionnalité, je suis là pour vous guider. 🎓"]
+};
+async function sendMsg(){
+  const input=document.getElementById('chat-input');
+  const msg=input.value.trim();
+  if(!msg) return;
+  input.value='';
+  const msgs=document.getElementById('chat-msgs');
+  const initials=(_profile?.full_name||'U').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+  // User bubble
+  msgs.innerHTML+=`<div class="msg user"><div class="msg-av user-av">${initials}</div><div class="bubble user-bubble">${msg}</div></div>`;
+  // Typing
+  const typingId='typing-'+Date.now();
+  msgs.innerHTML+=`<div class="msg" id="${typingId}"><div class="msg-av ai-av">E</div><div class="bubble ai-bubble" style="color:var(--text3)">⋯ en train d'écrire</div></div>`;
+  msgs.scrollTop=msgs.scrollHeight;
+  // Save to DB
+  const msgLower=msg.toLowerCase();
+  let respArr=AI_RESPONSES.default;
+  if(msgLower.includes('scorm')) respArr=AI_RESPONSES.scorm;
+  else if(msgLower.includes('h5p')) respArr=AI_RESPONSES.h5p;
+  else if(msgLower.includes('cours')||msgLower.includes('formation')) respArr=AI_RESPONSES.cours;
+  else if(msgLower.includes('ia')||msgLower.includes('intelligence')||msgLower.includes('chatgpt')||msgLower.includes('claude')) respArr=AI_RESPONSES.ia;
+  else if(msgLower.includes('marketing')) respArr=AI_RESPONSES.marketing;
+  const resp=respArr[Math.floor(Math.random()*respArr.length)];
+  setTimeout(async()=>{
+    document.getElementById(typingId)?.remove();
+    // Format markdown-like
+    const formatted=resp.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>').replace(/→/g,'<span style="color:var(--accent)">→</span>');
+    msgs.innerHTML+=`<div class="msg"><div class="msg-av ai-av">E</div><div><div class="bubble ai-bubble">${formatted}</div><div class="ai-tag">IA · Généré par ETAGIA-Tutor-v1 · 🇪🇺 AI Act conforme</div></div></div>`;
+    msgs.scrollTop=msgs.scrollHeight;
+    await sb.from('ai_interactions').insert({user_id:_user.id,session_id:_chatSession,user_message:msg,ai_response:resp,model_used:'etagia-tutor-v1'});
+  },1200);
+}
+
+// ── PROGRESS ──
+async function renderProgress(c){
+  c.innerHTML='<div class="loading"><div class="spin"></div></div>';
+  const {data:enrolls}=await sb.from('enrollments').select('*,courses(*)').eq('user_id',_user.id).order('last_accessed',{ascending:false});
+  const {data:attempts}=await sb.from('quiz_attempts').select('*,quizzes(title)').eq('user_id',_user.id).order('completed_at',{ascending:false}).limit(5);
+  c.innerHTML=`
+  <div class="sec-tag">Progression</div>
+  <h2 class="sec-title">Mon Parcours d'Apprentissage</h2>
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-val">${enrolls?.length||0}</div><div class="stat-lbl">Cours inscrits</div></div>
+    <div class="stat-box"><div class="stat-val">${enrolls?.filter(e=>e.progress>=100).length||0}</div><div class="stat-lbl">Cours terminés</div></div>
+    <div class="stat-box"><div class="stat-val">${_profile?.total_xp||0}</div><div class="stat-lbl">Points XP</div></div>
+    <div class="stat-box"><div class="stat-val">${_profile?.streak_days||0}🔥</div><div class="stat-lbl">Streak jours</div></div>
+  </div>
+  <h3 style="font-family:var(--d);font-size:17px;margin:24px 0 16px">Mes formations</h3>
+  ${enrolls?.length?`
+  <div style="display:flex;flex-direction:column;gap:12px">
+    ${enrolls.map(e=>`
+    <div class="card" style="display:flex;align-items:center;gap:16px;cursor:pointer" onclick="route$('/course/${e.course_id}')">
+      <div style="font-size:36px;background:${e.courses?.thumbnail_color||'#1C1410'};width:56px;height:56px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0">${e.courses?.thumbnail_emoji||'📚'}</div>
+      <div style="flex:1">
+        <div style="font-family:var(--d);font-size:14px;font-weight:600;margin-bottom:6px">${e.courses?.title||'Cours'}</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="prog-bar"><div class="prog-fill" style="width:${e.progress||0}%"></div></div>
+          <span style="font-size:12px;color:var(--text3);flex-shrink:0">${Math.round(e.progress||0)}%</span>
+        </div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        ${e.progress>=100?'<span class="badge badge-new">✓ Terminé</span>':'<span style="font-size:11px;color:var(--text3)">En cours</span>'}
+      </div>
+    </div>`).join('')}
+  </div>`:
+  `<div class="empty"><div class="big">📚</div><p>Inscrivez-vous à votre premier cours</p><button class="btn btn-primary" onclick="route$('/courses')">Explorer le catalogue →</button></div>`}
+  ${attempts?.length?`
+  <h3 style="font-family:var(--d);font-size:17px;margin:28px 0 16px">Derniers quiz</h3>
+  <table class="tbl">
+    <thead><tr><th>Quiz</th><th>Score</th><th>Résultat</th><th>Date</th></tr></thead>
+    <tbody>${attempts.map(a=>`<tr>
+      <td>${a.quizzes?.title||'Quiz'}</td>
+      <td style="font-family:var(--mono);color:${a.passed?'var(--ok)':'var(--danger)'}">${Math.round(a.score||0)}%</td>
+      <td><span class="badge ${a.passed?'badge-new':'badge-learner'}">${a.passed?'✓ Réussi':'✗ Échoué'}</span></td>
+      <td style="font-size:11px">${new Date(a.completed_at).toLocaleDateString('fr')}</td>
+    </tr>`).join('')}</tbody>
+  </table>`:''}`;
+}
+
+// ── TEACHER ──
+async function renderTeacher(c){
+  if(!_profile||!['teacher','admin'].includes(_profile.role)){
+    c.innerHTML='<div class="empty"><div class="big">🔒</div><p>Accès réservé aux formateurs</p></div>';return;
+  }
+  c.innerHTML='<div class="loading"><div class="spin"></div></div>';
+  const {data:courses}=await sb.from('courses').select('*').eq('author_id',_user.id).order('created_at',{ascending:false});
+  c.innerHTML=`
+  <div class="sec-tag">Formateur</div>
+  <h2 class="sec-title">Studio Créateur</h2>
+  <p class="sec-sub">Créez et gérez vos cours, modules et leçons</p>
+  <button class="btn btn-primary" style="margin-bottom:24px" onclick="openCreateCourse()">+ Nouveau cours</button>
+  ${courses?.length?`
+  <table class="tbl">
+    <thead><tr><th>Cours</th><th>Type</th><th>Status</th><th>Apprenants</th><th>Actions</th></tr></thead>
+    <tbody>${courses.map(c=>`<tr>
+      <td><strong>${c.title}</strong><br><span style="font-size:11px;color:var(--text3)">${c.category||'-'}</span></td>
+      <td><span class="cc-type type-${c.content_type}" style="position:static;display:inline-block">${c.content_type}</span></td>
+      <td><span class="badge ${c.status==='published'?'badge-new':'badge-learner'}">${c.status}</span></td>
+      <td>${c.learners_count||0}</td>
+      <td><button class="btn btn-outline btn-sm" onclick="route$('/course/${c.id}')">Voir</button></td>
+    </tr>`).join('')}</tbody>
+  </table>`:
+  `<div class="callout">Vous n'avez pas encore créé de cours. Cliquez sur <strong>Nouveau cours</strong> pour commencer !</div>`}`;
+}
+function openCreateCourse(){
+  openModal(`
+  <h2 style="font-family:var(--d);margin-bottom:6px">Nouveau cours</h2>
+  <p style="font-size:13px;color:var(--text2);margin-bottom:24px">Créez votre formation ETAGIA</p>
+  <div class="form-group"><label>Titre du cours</label><input id="nc-title" class="form-input" placeholder="Ex: Introduction à..."></div>
+  <div class="form-group"><label>Description</label><textarea id="nc-desc" class="form-input" rows="3" placeholder="Décrivez votre cours..."></textarea></div>
+  <div class="form-group"><label>Catégorie</label><input id="nc-cat" class="form-input" placeholder="Ex: Marketing, IA, Comptabilité..."></div>
+  <div class="form-group"><label>Type de contenu</label>
+    <select id="nc-type" class="form-input">
+      <option value="mixed">📚 Mixte (recommandé)</option>
+      <option value="h5p">🎮 H5P Interactif</option>
+      <option value="scorm">📦 SCORM</option>
+      <option value="video">🎬 Vidéo</option>
+      <option value="text">📝 Texte</option>
+    </select>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="form-group"><label>Niveau</label>
+      <select id="nc-level" class="form-input">
+        <option value="beginner">Débutant</option>
+        <option value="intermediate">Intermédiaire</option>
+        <option value="advanced">Avancé</option>
+        <option value="all">Tous niveaux</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Prix (FCFA, 0=gratuit)</label><input id="nc-price" class="form-input" type="number" value="0" min="0"></div>
+  </div>
+  <div class="form-group">
+    <label style="display:flex;align-items:center;gap:8px;text-transform:none;font-size:13px;cursor:pointer">
+      <input type="checkbox" id="nc-cert"> Cours certifiant
+    </label>
+  </div>
+  <div id="nc-err" class="form-err"></div>
+  <button class="btn btn-primary btn-full" style="margin-top:8px" onclick="createCourse()">Créer le cours →</button>
+  `);
+}
+async function createCourse(){
+  const title=document.getElementById('nc-title').value.trim();
+  if(!title){document.getElementById('nc-err').textContent='Le titre est requis';document.getElementById('nc-err').classList.add('show');return}
+  const emojis=['📚','🎯','💡','🚀','🔬','📊','💼','🌍','⚡','🎓'];
+  const {data,error}=await sb.from('courses').insert({
+    title,
+    description:document.getElementById('nc-desc').value,
+    category:document.getElementById('nc-cat').value,
+    content_type:document.getElementById('nc-type').value,
+    level:document.getElementById('nc-level').value,
+    price_fcfa:parseInt(document.getElementById('nc-price').value)||0,
+    is_certified:document.getElementById('nc-cert').checked,
+    thumbnail_emoji:emojis[Math.floor(Math.random()*emojis.length)],
+    thumbnail_color:'#1C1410',
+    author_id:_user.id,
+    status:'published'
+  }).select().single();
+  if(error){document.getElementById('nc-err').textContent=error.message;document.getElementById('nc-err').classList.add('show');return}
+  closeModal();
+  toast('Cours créé avec succès ! 🎉','ok');
+  route$('/teacher');
+}
+
+// ── ADMIN ──
+async function renderAdmin(c){
+  if(_profile?.role!=='admin'){c.innerHTML='<div class="empty"><div class="big">🔒</div><p>Accès administrateur requis</p><button class="btn btn-outline btn-sm" style="margin-top:12px" onclick="makeAdmin()">Devenir Admin (Dev)</button></div>';return}
+  c.innerHTML='<div class="loading"><div class="spin"></div></div>';
+  const [{data:users},{data:courses},{data:enrolls}]=await Promise.all([
+    sb.from('profiles').select('*').limit(20),
+    sb.from('courses').select('id').eq('status','published'),
+    sb.from('enrollments').select('id')
+  ]);
+  c.innerHTML=`
+  <div class="sec-tag">Administration</div>
+  <h2 class="sec-title">Admin Panel</h2>
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-val">${users?.length||0}</div><div class="stat-lbl">Utilisateurs</div></div>
+    <div class="stat-box"><div class="stat-val">${courses?.length||0}</div><div class="stat-lbl">Cours publiés</div></div>
+    <div class="stat-box"><div class="stat-val">${enrolls?.length||0}</div><div class="stat-lbl">Inscriptions totales</div></div>
+    <div class="stat-box"><div class="stat-val">🇪🇺</div><div class="stat-lbl">RGPD & AI Act ✓</div></div>
+  </div>
+  <h3 style="font-family:var(--d);font-size:17px;margin:24px 0 16px">Utilisateurs</h3>
+  <table class="tbl">
+    <thead><tr><th>Nom</th><th>Email</th><th>Rôle</th><th>Pays</th><th>XP</th><th>Actions</th></tr></thead>
+    <tbody>${(users||[]).map(u=>`<tr>
+      <td><strong>${u.full_name||'—'}</strong></td>
+      <td style="font-size:12px;font-family:var(--mono)">${u.id.slice(0,8)}…</td>
+      <td><span class="badge badge-${u.role||'learner'}">${u.role||'learner'}</span></td>
+      <td>${u.country||'—'}</td>
+      <td>${u.total_xp||0}</td>
+      <td>
+        <select class="form-input" style="padding:4px 8px;font-size:11px" onchange="changeRole('${u.id}',this.value)">
+          ${['learner','teacher','admin'].map(r=>`<option value="${r}" ${u.role===r?'selected':''}>${r}</option>`).join('')}
+        </select>
+      </td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+async function makeAdmin(){
+  await sb.from('profiles').update({role:'admin'}).eq('id',_user.id);
+  _profile={..._profile,role:'admin'};
+  updateSidebar();
+  toast('Rôle admin activé !','ok');
+  renderAdmin(document.getElementById('content'));
+}
+async function changeRole(userId,role){
+  await sb.from('profiles').update({role}).eq('id',userId);
+  toast(`Rôle mis à jour : ${role}`,'ok');
+}
+
+// ── INIT ──
+async function init(){
+  const {data:{session}}=await sb.auth.getSession();
+  if(session?.user){
+    _user=session.user;
+    await loadProfile();
+    await seedIfNeeded();
+    showApp();
+    if(!window.location.hash) window.location.hash='#/';
+    renderRoute();
+  } else {
+    showAuth('login');
+  }
+  sb.auth.onAuthStateChange(async(event,session)=>{
+    if(event==='SIGNED_IN'&&session?.user&&!_user){
+      _user=session.user;
+      await loadProfile();
+      await seedIfNeeded();
+      showApp();
+    }
+    if(event==='SIGNED_OUT'){_user=null;_profile=null;showAuth('login')}
+  });
+}
+init();
+</script>
+</body>
+</html>
