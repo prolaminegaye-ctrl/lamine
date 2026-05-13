@@ -13,57 +13,58 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [magicSent, setMagicSent] = useState(false)
 
+  const withTimeout = <T,>(promise: Promise<T>, ms = 12000): Promise<T> =>
+    Promise.race([promise, new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('timeout')), ms)
+    )])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setLoading(true)
     const sb = createClient()
 
-    if (mode === 'login') {
-      // Try password login first
-      const { error: pwErr } = await sb.auth.signInWithPassword({ email, password })
-      if (!pwErr) { router.push('/dashboard'); router.refresh(); return }
+    try {
+      if (mode === 'login') {
+        const { error: pwErr } = await withTimeout(sb.auth.signInWithPassword({ email, password }))
+        if (!pwErr) { router.push('/dashboard'); router.refresh(); return }
 
-      // If password login fails, send magic link as fallback
-      if (pwErr.message === 'Invalid login credentials') {
-        setError('Email ou mot de passe incorrect')
-        setLoading(false)
-        return
-      }
-
-      // Email not confirmed → send magic link
-      const { error: magicErr } = await sb.auth.signInWithOtp({
-        email,
-        options: { emailRedirectTo: `${window.location.origin}/auth/callback` }
-      })
-      if (!magicErr) { setMagicSent(true); setLoading(false); return }
-      setError(pwErr.message)
-      setLoading(false)
-
-    } else {
-      // Register: signup then auto-login
-      const { data, error: signUpErr } = await sb.auth.signUp({
-        email, password,
-        options: {
-          data: { full_name: fullName },
-          emailRedirectTo: `${window.location.origin}/auth/callback`
+        if (pwErr.message === 'Invalid login credentials') {
+          setError('Email ou mot de passe incorrect')
+          setLoading(false); return
         }
-      })
-      if (signUpErr) { setError(signUpErr.message); setLoading(false); return }
 
-      // Session exists → email confirmation disabled, go straight to dashboard
-      if (data.session) {
-        router.push('/dashboard'); router.refresh(); return
+        const { error: magicErr } = await withTimeout(sb.auth.signInWithOtp({
+          email,
+          options: { emailRedirectTo: `${window.location.origin}/auth/callback` }
+        }))
+        if (!magicErr) { setMagicSent(true); setLoading(false); return }
+        setError(pwErr.message)
+        setLoading(false)
+
+      } else {
+        const { data, error: signUpErr } = await withTimeout(sb.auth.signUp({
+          email, password,
+          options: {
+            data: { full_name: fullName },
+            emailRedirectTo: `${window.location.origin}/auth/callback`
+          }
+        }))
+        if (signUpErr) { setError(signUpErr.message); setLoading(false); return }
+
+        if (data.session) { router.push('/dashboard'); router.refresh(); return }
+
+        const { error: magicErr } = await withTimeout(sb.auth.signInWithOtp({
+          email,
+          options: { emailRedirectTo: `${window.location.origin}/auth/callback` }
+        }))
+        if (!magicErr) { setMagicSent(true); setLoading(false); return }
+
+        setError('Compte créé — vérifiez votre email pour vous connecter')
+        setLoading(false)
       }
-
-      // No session → send magic link so user can enter immediately
-      const { error: magicErr } = await sb.auth.signInWithOtp({
-        email,
-        options: { emailRedirectTo: `${window.location.origin}/auth/callback` }
-      })
-      if (!magicErr) { setMagicSent(true); setLoading(false); return }
-
-      setError('Compte créé — vérifiez votre email pour vous connecter')
+    } catch {
+      setError('Connexion lente — vérifiez votre email ou réessayez dans quelques secondes')
       setLoading(false)
     }
   }
