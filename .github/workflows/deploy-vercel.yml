@@ -32,6 +32,7 @@ jobs:
           echo "Token length: ${#TOKEN}"
           OUTPUT=$(vercel deploy --prod --yes \
             --token="$TOKEN" \
+            --name="etagia-lms" \
             --env NEXT_PUBLIC_SUPABASE_URL="https://taimtpltpaxugfcmwsux.supabase.co" \
             --env NEXT_PUBLIC_SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRhaW10cGx0cGF4dWdmY213c3V4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwODg2NjQsImV4cCI6MjA5MzY2NDY2NH0.CxGX4CetHYhb-FqN6LWZlm0VS4PevUdc6p9IGPQe-Ow" \
             2>&1 | tee /tmp/out.txt)
