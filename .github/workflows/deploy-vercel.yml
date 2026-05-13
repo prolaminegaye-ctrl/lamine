@@ -21,20 +21,31 @@ jobs:
           cache: 'npm'
           cache-dependency-path: etagia-lms/package-lock.json
 
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
       - name: Install dependencies
         run: npm ci
 
       - name: Deploy to Vercel
         id: deploy
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          SUPABASE_URL: https://taimtpltpaxugfcmwsux.supabase.co
+          SUPABASE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRhaW10cGx0cGF4dWdmY213c3V4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwODg2NjQsImV4cCI6MjA5MzY2NDY2NH0.CxGX4CetHYhb-FqN6LWZlm0VS4PevUdc6p9IGPQe-Ow
         run: |
-          DEPLOY_URL=$(npx vercel deploy --prod --yes \
-            --token="${{ secrets.VERCEL_TOKEN }}" \
-            --env NEXT_PUBLIC_SUPABASE_URL="${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" \
-            --env NEXT_PUBLIC_SUPABASE_ANON_KEY="${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" \
-            --env ANTHROPIC_API_KEY="${{ secrets.ANTHROPIC_API_KEY }}" \
-            2>&1 | tail -1)
-          echo "url=$DEPLOY_URL" >> $GITHUB_OUTPUT
-          echo "Deployed: $DEPLOY_URL"
+          OUTPUT=$(vercel deploy --prod --yes \
+            --token="$VERCEL_TOKEN" \
+            --env NEXT_PUBLIC_SUPABASE_URL="$SUPABASE_URL" \
+            --env NEXT_PUBLIC_SUPABASE_ANON_KEY="$SUPABASE_KEY" \
+            2>&1)
+          echo "$OUTPUT"
+          URL=$(echo "$OUTPUT" | grep -o 'https://[^ ]*\.vercel\.app' | tail -1)
+          echo "url=$URL" >> $GITHUB_OUTPUT
+          echo ">>> DEPLOYED TO: $URL"
 
-      - name: Show URL
-        run: echo "ETAGIA LMS live at ${{ steps.deploy.outputs.url }}"
+      - name: Summary
+        run: |
+          echo "## ETAGIA LMS Deployed" >> $GITHUB_STEP_SUMMARY
+          echo "URL: ${{ steps.deploy.outputs.url }}" >> $GITHUB_STEP_SUMMARY
+          echo "Deployed at: $(date)" >> $GITHUB_STEP_SUMMARY
