@@ -5,28 +5,11 @@ on:
     branches: [claude/make-site-functional-7if3x]
   workflow_dispatch:
 
-env:
-  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-  NEXT_PUBLIC_SUPABASE_URL: https://taimtpltpaxugfcmwsux.supabase.co
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRhaW10cGx0cGF4dWdmY213c3V4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwODg2NjQsImV4cCI6MjA5MzY2NDY2NH0.CxGX4CetHYhb-FqN6LWZlm0VS4PevUdc6p9IGPQe-Ow
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Check token
-        run: |
-          echo "Token starts with: ${VERCEL_TOKEN:0:10}..."
-          echo "Token length: ${#VERCEL_TOKEN}"
-
-      - name: Test Vercel API
-        run: |
-          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" \
-            -H "Authorization: Bearer $VERCEL_TOKEN" \
-            https://api.vercel.com/v2/user)
-          echo "API Response: $RESPONSE"
 
       - uses: actions/setup-node@v4
         with:
@@ -40,18 +23,19 @@ jobs:
         run: npm ci
 
       - name: Deploy to Vercel
+        id: deploy
         working-directory: etagia-lms
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          set +e
-          vercel deploy --prod --yes \
-            --token="$VERCEL_TOKEN" \
-            --env NEXT_PUBLIC_SUPABASE_URL="$NEXT_PUBLIC_SUPABASE_URL" \
-            --env NEXT_PUBLIC_SUPABASE_ANON_KEY="$NEXT_PUBLIC_SUPABASE_ANON_KEY" \
-            2>&1 | tee /tmp/vercel_output.txt
-          EXIT_CODE=$?
-          echo "Exit code: $EXIT_CODE"
-          cat /tmp/vercel_output.txt
-          URL=$(grep -o 'https://[^ ]*\.vercel\.app' /tmp/vercel_output.txt | tail -1)
-          echo "Deployed URL: $URL"
+          TOKEN=$(echo -n "$VERCEL_TOKEN" | tr -d '\t\n\r ')
+          echo "Token length: ${#TOKEN}"
+          OUTPUT=$(vercel deploy --prod --yes \
+            --token="$TOKEN" \
+            --env NEXT_PUBLIC_SUPABASE_URL="https://taimtpltpaxugfcmwsux.supabase.co" \
+            --env NEXT_PUBLIC_SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRhaW10cGx0cGF4dWdmY213c3V4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwODg2NjQsImV4cCI6MjA5MzY2NDY2NH0.CxGX4CetHYhb-FqN6LWZlm0VS4PevUdc6p9IGPQe-Ow" \
+            2>&1 | tee /tmp/out.txt)
+          cat /tmp/out.txt
+          URL=$(grep -o 'https://[^ ]*\.vercel\.app' /tmp/out.txt | tail -1)
           echo "url=$URL" >> $GITHUB_OUTPUT
-          exit $EXIT_CODE
+          echo ">>> DEPLOYED TO: $URL"
