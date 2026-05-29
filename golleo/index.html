@@ -1175,12 +1175,17 @@ window.addEventListener('load',()=>{
   }
   showView('sim');
   // Vérifier santé du serveur API
-  fetch('/api/health').then(r=>{
-    if(!r.ok) throw new Error();
+  fetch('/api/health').then(r=>r.json()).then(data=>{
+    const s=document.getElementById('ai-status');
+    if(data.demo){
+      s.className='badge badge-orange';
+      s.innerHTML='<svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="currentColor"/></svg> Mode Démo';
+      toast('Mode démo actif — toutes les fonctionnalités sont disponibles ⚡','⚡',5000);
+    }
   }).catch(()=>{
     const s=document.getElementById('ai-status');
     s.className='badge badge-orange';
-    s.innerHTML='<svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="currentColor"/></svg> Serveur IA offline';
+    s.innerHTML='<svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="currentColor"/></svg> Serveur offline';
     toast('Serveur API non détecté. Lancez : npm run dev','⚠️',6000);
   });
 });
