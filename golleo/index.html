@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="fr" translate="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="google" content="notranslate">
+<title>Golléo — Plateforme IA Carrière</title>
+<style>
+/* ─── DESIGN SYSTEM ─────────────────────────────────────────────────────── */
+:root {
+  --bg:        #130D2E;
+  --bg2:       #1C1540;
+  --bg3:       #231A50;
+  --card:      rgba(255,255,255,0.06);
+  --card-hov:  rgba(255,255,255,0.10);
+  --border:    rgba(255,255,255,0.08);
+  --purple:    #7B5EA7;
+  --purple2:   #9B7DD4;
+  --lavender:  #C4B5E8;
+  --white:     #FFFFFF;
+  --text:      rgba(255,255,255,0.92);
+  --muted:     rgba(255,255,255,0.45);
+  --pastel-g:  #C8E6C9;
+  --pastel-c:  #FFCCBC;
+  --pastel-b:  #B3E5FC;
+  --pastel-l:  #E1BEE7;
+  --green:     #4CAF50;
+  --red:       #F44336;
+  --orange:    #FF9800;
+  --r:         20px;
+  --r2:        14px;
+  --shadow:    0 8px 32px rgba(0,0,0,0.4);
+  --tr: all 0.2s cubic-bezier(0.4,0,0.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{width:240px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:20px 12px;gap:4px}
+.logo{display:flex;align-items:center;gap:10px;padding:8px 12px 20px;text-decoration:none}
+.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,#7B5EA7,#9B7DD4);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;color:white}
+.logo-text{font-weight:800;font-size:18px;color:var(--white)}
+.nav-sec{font-size:10px;font-weight:700;letter-spacing:1.2px;color:var(--muted);text-transform:uppercase;padding:16px 12px 6px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r2);cursor:pointer;transition:var(--tr);color:var(--muted);font-size:14px;font-weight:500;border:none;background:none;width:100%;text-align:left}
+.nav-item:hover{background:var(--card-hov);color:var(--text)}
+.nav-item.active{background:rgba(123,94,167,0.25);color:var(--lavender)}
+.nav-badge{margin-left:auto;background:var(--purple);color:white;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px}
+.sidebar-bottom{margin-top:auto;padding-top:12px;border-top:1px solid var(--border)}
+.user-card{display:flex;align-items:center;gap:10px;padding:10px 12px}
+.avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#7B5EA7,#C4B5E8);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:white;flex-shrink:0}
+.user-name{font-size:13px;font-weight:600;color:var(--text)}
+.user-plan{font-size:11px;color:var(--purple2);font-weight:600}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;display:flex;flex-direction:column;min-width:0}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 28px;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0}
+.topbar-title{font-size:20px;font-weight:800}
+.topbar-sub{font-size:13px;color:var(--muted);margin-top:2px}
+
+/* ── BUG FIX: toutes les vues masquées par défaut, chacune a son display correct ── */
+.view{display:none;padding:28px;flex:1}
+#view-sim{padding:0;flex-direction:column}           /* sim a besoin de flex */
+#view-sim.active{display:flex}                       /* sim = flex column    */
+.view.active{display:block}                          /* toutes les autres    */
+#view-sim.active ~ .view,
+.view.active:is(#view-cv,#view-jobs,#view-dashboard){display:block}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:var(--r2);font-size:14px;font-weight:600;cursor:pointer;border:none;transition:var(--tr);text-decoration:none;font-family:inherit}
+.btn-primary{background:var(--purple);color:white}
+.btn-primary:hover{background:var(--purple2);transform:translateY(-1px);box-shadow:0 4px 20px rgba(123,94,167,0.5)}
+.btn-primary:disabled{opacity:0.6;cursor:not-allowed;transform:none}
+.btn-ghost{background:var(--card);color:var(--text);border:1px solid var(--border)}
+.btn-ghost:hover{background:var(--card-hov)}
+.btn-sm{padding:7px 14px;font-size:13px}
+.btn-lg{padding:14px 28px;font-size:15px}
+.btn-danger{background:rgba(244,67,54,0.15);color:#F44336;border:1px solid rgba(244,67,54,0.3)}
+.w-full{width:100%}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px}
+.pastel-l{background:var(--pastel-l);color:#4A148C}
+.pastel-g{background:var(--pastel-g);color:#1B5E20}
+.pastel-b{background:var(--pastel-b);color:#01579B}
+.pastel-c{background:var(--pastel-c);color:#BF360C}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.stat-card{border-radius:var(--r);padding:20px}
+.stat-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;opacity:.7}
+.stat-value{font-size:32px;font-weight:900;line-height:1;margin-top:6px}
+.stat-delta{font-size:12px;font-weight:600;margin-top:6px;opacity:.8}
+
+/* FEATURES */
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
+.feature-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:24px;cursor:pointer;transition:var(--tr);display:flex;flex-direction:column;gap:12px}
+.feature-card:hover{background:var(--card-hov);transform:translateY(-2px);border-color:var(--purple)}
+.feature-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px}
+.tag{font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;background:rgba(123,94,167,0.2);color:var(--lavender)}
+
+/* FORMS */
+.form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.form-label{font-size:13px;font-weight:600}
+.form-input,.form-select,.form-textarea{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;transition:var(--tr);outline:none;width:100%}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(123,94,167,0.2)}
+.form-textarea{resize:vertical;min-height:100px}
+.form-select option{background:var(--bg2)}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600}
+.badge-purple{background:rgba(123,94,167,0.2);color:var(--lavender)}
+.badge-green{background:rgba(76,175,80,0.15);color:#81C784}
+.badge-red{background:rgba(244,67,54,0.15);color:#EF9A9A}
+.badge-orange{background:rgba(255,152,0,0.15);color:#FFB74D}
+
+/* PROGRESS */
+.progress-bar{height:8px;background:var(--bg3);border-radius:4px;overflow:hidden}
+.progress-fill{height:100%;border-radius:4px;transition:width .6s ease}
+
+/* LOADING SPINNER */
+.spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:3px}
+
+/* ─── INTERVIEW SIMULATOR ────────────────────────────────────────────────── */
+.mode-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px}
+.mode-card{background:var(--card);border:2px solid var(--border);border-radius:var(--r);padding:18px 14px;text-align:center;cursor:pointer;transition:var(--tr)}
+.mode-card:hover,.mode-card.selected{border-color:var(--purple);background:rgba(123,94,167,0.15)}
+.mode-card.selected{box-shadow:0 0 0 3px rgba(123,94,167,0.25)}
+.mode-icon{font-size:28px;margin-bottom:8px}
+.mode-label{font-size:13px;font-weight:700}
+.mode-sub{font-size:11px;color:var(--muted);margin-top:3px}
+
+/* Room */
+.room-wrap{display:none;flex:1;overflow:hidden;padding:20px;flex-direction:column}
+.room-wrap.active{display:flex}
+.room-header{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:var(--bg2);border-radius:var(--r);margin-bottom:16px;flex-shrink:0}
+.room-body{flex:1;display:grid;grid-template-columns:1fr 300px;gap:16px;min-height:0}
+.room-main{display:flex;flex-direction:column;gap:14px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:22px;overflow:hidden}
+.question-area{background:var(--bg3);border-radius:var(--r2);padding:18px;flex-shrink:0}
+.q-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--purple2);margin-bottom:6px}
+.q-text{font-size:16px;font-weight:600;line-height:1.6}
+.transcript-wrap{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:4px}
+.t-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+.t-text{font-size:15px;line-height:1.8;min-height:60px}
+.cursor{display:inline-block;width:2px;height:18px;background:var(--purple2);margin-left:2px;animation:blink 1s infinite;vertical-align:text-bottom}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.mic-zone{display:flex;flex-direction:column;align-items:center;gap:10px;padding:12px 0;flex-shrink:0}
+.mic-btn{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--purple2));border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--tr);box-shadow:0 4px 24px rgba(123,94,167,0.5)}
+.mic-btn:hover{transform:scale(1.05)}
+.mic-btn.recording{background:linear-gradient(135deg,#C62828,#E53935);box-shadow:0 4px 24px rgba(198,40,40,0.5);animation:pulse-red 1.5s ease-in-out infinite}
+@keyframes pulse-red{0%,100%{box-shadow:0 4px 24px rgba(198,40,40,0.5);transform:scale(1)}50%{box-shadow:0 4px 40px rgba(198,40,40,0.8);transform:scale(1.04)}}
+.mic-hint{font-size:13px;color:var(--muted)}
+.room-sidebar{display:flex;flex-direction:column;gap:12px;overflow-y:auto}
+.metric-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:16px}
+.m-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:8px}
+.m-big{font-size:32px;font-weight:900;line-height:1}
+.m-sub{font-size:11px;color:var(--muted);margin-top:4px}
+.kw-chip{font-size:11px;padding:3px 8px;border-radius:20px;background:rgba(123,94,167,0.2);color:var(--lavender);display:inline-block;margin:2px}
+.kw-chip.bad{background:rgba(244,67,54,0.15);color:#EF9A9A}
+.timer-d{font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;background:var(--bg3);padding:6px 12px;border-radius:8px;min-width:64px;text-align:center}
+.timer-d.urgent{color:var(--red);animation:blink .5s infinite}
+
+/* Results */
+.result-hero{text-align:center;padding:32px;background:linear-gradient(135deg,rgba(123,94,167,.15),rgba(155,125,212,.1));border:1px solid rgba(123,94,167,.3);border-radius:var(--r);margin-bottom:24px}
+.result-score{font-size:72px;font-weight:900;line-height:1}
+.result-mention{font-size:18px;font-weight:700;color:var(--lavender);margin-top:8px}
+.score-breakdown{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:20px}
+.score-dim-val{font-size:28px;font-weight:900}
+.score-dim-label{font-size:11px;color:var(--muted);margin-top:4px;font-weight:600}
+.answer-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:16px;margin-bottom:12px}
+
+/* ─── CV BUILDER ─────────────────────────────────────────────────────────── */
+.cv-layout{display:grid;grid-template-columns:1fr 1fr;gap:24px;height:calc(100vh - 160px)}
+.cv-editor{display:flex;flex-direction:column;gap:0;overflow-y:auto}
+.cv-preview{background:white;color:#1A1040;border-radius:var(--r);overflow-y:auto;box-shadow:var(--shadow)}
+.cv-preview-inner{padding:32px;min-height:100%}
+.editor-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0}
+.editor-tab{padding:10px 16px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:var(--tr);background:none;border-left:none;border-right:none;border-top:none;font-family:inherit}
+.editor-tab.active{color:var(--lavender);border-bottom-color:var(--purple)}
+.editor-pane{display:none;padding:16px}
+.editor-pane.active{display:block}
+.template-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tpl-thumb{border-radius:var(--r2);border:2px solid var(--border);overflow:hidden;cursor:pointer;transition:var(--tr);aspect-ratio:.7;display:flex;align-items:flex-end;justify-content:center;font-size:10px;font-weight:700;padding-bottom:8px;position:relative}
+.tpl-thumb.selected{border-color:var(--purple);box-shadow:0 0 0 3px rgba(123,94,167,.3)}
+.tpl-ats{background:linear-gradient(to bottom,#f5f5f5,white);color:#333}
+.tpl-corporate{background:linear-gradient(to bottom,#1A237E 30%,white 30%);color:white}
+.tpl-minimal{background:white;border-left:4px solid #7B5EA7 !important;color:#7B5EA7}
+.tpl-startup{background:linear-gradient(135deg,#7B5EA7,#C4B5E8);color:white}
+.tpl-creative{background:linear-gradient(135deg,#FF8A65,#FFF9C4);color:#4E342E}
+.tpl-modern{background:linear-gradient(135deg,#212121,#424242);color:white}
+
+/* ─── JOB ANALYZER ──────────────────────────────────────────────────────── */
+.analyzer-layout{display:grid;grid-template-columns:1fr 360px;gap:24px}
+.score-ring-wrap{text-align:center;padding:20px 0}
+.score-ring{width:130px;height:130px;border-radius:50%;background:conic-gradient(var(--purple) 0% var(--pct,0%),var(--bg3) var(--pct,0%));display:flex;align-items:center;justify-content:center;margin:0 auto 12px;position:relative}
+.score-ring::before{content:'';width:100px;height:100px;background:var(--bg2);border-radius:50%;position:absolute}
+.score-ring-val{font-size:28px;font-weight:900;position:relative;z-index:1}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;margin:3px}
+.chip-match{background:rgba(76,175,80,.15);color:#81C784}
+.chip-miss{background:rgba(244,67,54,.12);color:#EF9A9A}
+.chip-neutral{background:rgba(255,255,255,.07);color:var(--muted)}
+
+/* TOAST */
+.toast-c{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:10px;z-index:9999}
+.toast{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:12px 18px;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow);min-width:240px;animation:toastIn .3s ease}
+@keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+
+/* UTILS */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.mb-3{margin-bottom:12px}
+.mb-4{margin-bottom:16px}
+.mb-6{margin-bottom:24px}
+.mt-3{margin-top:12px}
+.section-title{font-size:16px;font-weight:700;margin-bottom:14px}
+.text-muted{color:var(--muted)}
+.text-sm{font-size:13px}
+.text-xs{font-size:11px}
+.text-purple{color:var(--purple2)}
+.text-green{color:var(--green)}
+.font-bold{font-weight:700}
+.text-center{text-align:center}
+.flex{display:flex}
+.items-center{align-items:center}
+.gap-2{gap:8px}
+.gap-3{gap:12px}
+.flex-1{flex:1}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <a class="logo" href="#" onclick="showView('dashboard');return false">
+    <div class="logo-icon">G</div>
+    <span class="logo-text">Golléo</span>
+  </a>
+  <span class="nav-sec">Modules IA</span>
+  <button class="nav-item active" id="nav-sim" onclick="showView('sim')">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+    Simulateur IA <span class="nav-badge">Live</span>
+  </button>
+  <button class="nav-item" id="nav-cv" onclick="showView('cv')">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+    CV Builder
+  </button>
+  <button class="nav-item" id="nav-jobs" onclick="showView('jobs')">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    Analyse Offres
+  </button>
+  <span class="nav-sec">Orientation</span>
+  <button class="nav-item" onclick="toast('Bientôt disponible','🧭')">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+    RIASEC
+  </button>
+  <button class="nav-item" onclick="toast('Bientôt disponible','🎯')">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+    Ikigaï
+  </button>
+  <span class="nav-sec">Espace</span>
+  <button class="nav-item" id="nav-dashboard" onclick="showView('dashboard')">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    Tableau de bord
+  </button>
+  <div class="sidebar-bottom">
+    <div class="user-card">
+      <div class="avatar">L</div>
+      <div>
+        <div class="user-name">Lamine G.</div>
+        <div class="user-plan">Premium IA</div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title" id="topbar-title">Simulateur d'Entretien IA</div>
+      <div class="topbar-sub" id="topbar-sub">Entraîne-toi comme avec un vrai recruteur — feedback IA en temps réel</div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <span class="badge badge-green" id="ai-status">
+        <svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="currentColor"/></svg>
+        IA active
+      </span>
+    </div>
+  </div>
+
+  <!-- ═══ VIEW: SIMULATEUR ════════════════════════════════════════════════ -->
+  <!-- BUG FIX: suppression du style inline display:flex/flex-direction qui bloquait le masquage -->
+  <div class="view" id="view-sim">
+
+    <!-- SETUP -->
+    <div id="sim-setup" style="flex:1;overflow-y:auto;padding:28px;">
+      <div style="max-width:600px;margin:0 auto;padding:20px 0;">
+        <div style="text-align:center;margin-bottom:36px;">
+          <div style="font-size:52px;margin-bottom:14px;">🎙️</div>
+          <h1 style="font-size:30px;font-weight:900;margin-bottom:8px;">Prépare ton entretien</h1>
+          <p style="color:var(--muted);font-size:15px;">Questions IA adaptées à ton poste · Feedback Claude · Score multi-dimensions</p>
+        </div>
+        <div class="form-group mb-4">
+          <label class="form-label">Poste visé</label>
+          <input class="form-input" id="sim-job" placeholder="Ex: Product Manager, Dev React, Consultant..." value="Product Manager Senior">
+        </div>
+        <div class="form-group mb-4">
+          <label class="form-label">Niveau</label>
+          <select class="form-select" id="sim-level">
+            <option value="junior">Junior (0–2 ans)</option>
+            <option value="mid" selected>Confirmé (3–5 ans)</option>
+            <option value="senior">Senior (6+ ans)</option>
+          </select>
+        </div>
+        <label class="form-label" style="display:block;margin-bottom:10px;">Type d'entretien</label>
+        <div class="mode-grid">
+          <div class="mode-card selected" data-mode="rh" onclick="selectMode(this,'rh')"><div class="mode-icon">💼</div><div class="mode-label">RH Classique</div><div class="mode-sub">Motivations, parcours</div></div>
+          <div class="mode-card" data-mode="tech" onclick="selectMode(this,'tech')"><div class="mode-icon">⚡</div><div class="mode-label">Technique</div><div class="mode-sub">Compétences, méthodes</div></div>
+          <div class="mode-card" data-mode="star" onclick="selectMode(this,'star')"><div class="mode-icon">🧩</div><div class="mode-label">Comportemental</div><div class="mode-sub">Méthode STAR</div></div>
+          <div class="mode-card" data-mode="com" onclick="selectMode(this,'com')"><div class="mode-icon">📈</div><div class="mode-label">Commercial</div><div class="mode-sub">Pitch, objections</div></div>
+          <div class="mode-card" data-mode="startup" onclick="selectMode(this,'startup')"><div class="mode-icon">🚀</div><div class="mode-label">Startup</div><div class="mode-sub">Agilité, impact</div></div>
+          <div class="mode-card" data-mode="ecole" onclick="selectMode(this,'ecole')"><div class="mode-icon">🎓</div><div class="mode-label">Grandes Écoles</div><div class="mode-sub">Logique, culture</div></div>
+        </div>
+        <button class="btn btn-primary btn-lg w-full" onclick="startInterview()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Démarrer l'entretien
+        </button>
+        <div style="margin-top:14px;padding:13px 16px;background:rgba(123,94,167,.1);border:1px solid rgba(123,94,167,.2);border-radius:var(--r2);font-size:13px;color:var(--muted);display:flex;gap:10px;">
+          <span>💡</span><span>L'IA pose des questions à voix haute. Parle naturellement ou tape ta réponse. Feedback Claude précis après chaque réponse.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROOM -->
+    <div id="sim-room" class="room-wrap">
+      <div class="room-header">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div id="live-dot" style="width:10px;height:10px;border-radius:50%;background:#F44336;animation:pulse-red 1s infinite;"></div>
+          <span style="font-size:14px;font-weight:700;" id="room-label">Entretien en cours</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span style="font-size:13px;color:var(--muted);" id="q-counter">Q 1/5</span>
+          <div class="timer-d" id="timer">00:00</div>
+          <button class="btn btn-danger btn-sm" onclick="endInterview()">Terminer</button>
+        </div>
+      </div>
+      <div class="room-body">
+        <div class="room-main">
+          <div class="question-area">
+            <div class="q-label">Question IA</div>
+            <div class="q-text" id="cur-q">Chargement...</div>
+          </div>
+          <div class="transcript-wrap">
+            <div class="t-label">Ta réponse</div>
+            <div class="t-text" id="transcript"><span class="text-muted">Appuie sur le micro et parle...</span></div>
+          </div>
+          <div class="mic-zone">
+            <button class="mic-btn" id="mic-btn" onclick="toggleMic()">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2" stroke="white" stroke-width="2" fill="none"/><line x1="12" y1="19" x2="12" y2="23" stroke="white" stroke-width="2"/><line x1="8" y1="23" x2="16" y2="23" stroke="white" stroke-width="2"/></svg>
+            </button>
+            <span class="mic-hint" id="mic-hint">Clique pour parler</span>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+              <button class="btn btn-ghost btn-sm" id="btn-validate" onclick="submitAnswer()">✓ Valider ma réponse</button>
+              <button class="btn btn-ghost btn-sm" onclick="skipQ()">Passer →</button>
+            </div>
+          </div>
+        </div>
+        <div class="room-sidebar">
+          <div class="metric-card">
+            <div class="m-title">Score en direct</div>
+            <div class="m-big text-purple" id="live-score">—</div>
+            <div class="m-sub" id="live-score-sub">Basé sur ta dernière réponse</div>
+          </div>
+          <div class="metric-card">
+            <div class="m-title">Débit de parole</div>
+            <div class="m-big" id="wpm" style="font-size:26px;color:var(--pastel-g);">— wpm</div>
+            <div class="m-sub">Idéal : 120–160 wpm</div>
+            <div class="progress-bar" style="margin-top:8px;"><div class="progress-fill" id="wpm-bar" style="width:0%;background:var(--green);"></div></div>
+          </div>
+          <div class="metric-card">
+            <div class="m-title">Mots parasites</div>
+            <div style="display:flex;align-items:baseline;gap:6px;"><div class="m-big" id="filler-n" style="font-size:28px;">0</div><div class="text-muted text-sm">détectés</div></div>
+            <div id="filler-list" style="margin-top:6px;font-size:12px;color:#EF9A9A;"></div>
+          </div>
+          <div class="metric-card">
+            <div class="m-title">Mots-clés métier</div>
+            <div id="kw-list"><span class="text-muted text-sm">En attente...</span></div>
+          </div>
+          <div class="metric-card" id="tip-card" style="display:none;">
+            <div class="m-title" style="color:var(--purple2);">Conseil IA 💡</div>
+            <div style="font-size:13px;line-height:1.6;" id="tip-text"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div id="sim-results" style="display:none;flex:1;overflow-y:auto;padding:28px;">
+      <div style="max-width:900px;margin:0 auto;">
+        <div class="result-hero">
+          <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--lavender);margin-bottom:8px;">Résultats de l'entretien</div>
+          <div class="result-score" id="res-score">78<span style="font-size:36px;color:var(--muted);">/100</span></div>
+          <div class="result-mention" id="res-mention">Bon niveau</div>
+          <div class="score-breakdown">
+            <div class="score-dim"><div class="score-dim-val" id="rd-p" style="color:var(--pastel-b);">—</div><div class="score-dim-label">Pertinence</div></div>
+            <div class="score-dim"><div class="score-dim-val" id="rd-s" style="color:var(--pastel-g);">—</div><div class="score-dim-label">Structure</div></div>
+            <div class="score-dim"><div class="score-dim-val" id="rd-i" style="color:var(--pastel-c);">—</div><div class="score-dim-label">Impact</div></div>
+            <div class="score-dim"><div class="score-dim-val" id="rd-f" style="color:var(--pastel-l);">—</div><div class="score-dim-label">Fluidité</div></div>
+          </div>
+        </div>
+        <div class="grid-2 mb-4">
+          <div class="card"><div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:10px;">Points forts</div><div id="res-strengths" style="font-size:13px;line-height:1.8;"></div></div>
+          <div class="card"><div style="font-size:13px;font-weight:700;color:var(--orange);margin-bottom:10px;">À améliorer</div><div id="res-gaps" style="font-size:13px;line-height:1.8;"></div></div>
+        </div>
+        <div class="section-title">Analyse par réponse</div>
+        <div id="res-breakdown"></div>
+        <div style="display:flex;gap:12px;margin-top:20px;">
+          <button class="btn btn-primary" onclick="resetSim()">↩ Recommencer</button>
+          <button class="btn btn-ghost" onclick="showView('jobs')">Analyser une offre →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ VIEW: CV BUILDER ════════════════════════════════════════════════ -->
+  <div class="view" id="view-cv">
+    <div class="cv-layout">
+      <div class="cv-editor">
+        <div class="editor-tabs">
+          <button class="editor-tab active" onclick="cvTab(this,'t-info')">Infos</button>
+          <button class="editor-tab" onclick="cvTab(this,'t-exp')">Expérience</button>
+          <button class="editor-tab" onclick="cvTab(this,'t-skills')">Compétences</button>
+          <button class="editor-tab" onclick="cvTab(this,'t-tpl')">Templates</button>
+        </div>
+        <div class="editor-pane active" id="t-info">
+          <div class="form-group"><label class="form-label">Prénom Nom</label><input class="form-input" id="cv-name" value="Lamine Gaye" oninput="renderCV()"></div>
+          <div class="form-group"><label class="form-label">Titre professionnel</label><div style="display:flex;gap:8px;"><input class="form-input" id="cv-title" value="Product Manager Senior" oninput="renderCV()"><button class="btn btn-ghost btn-sm" id="btn-ai-title" onclick="aiCV('title')">✨</button></div></div>
+          <div class="form-group"><label class="form-label">Contact</label><input class="form-input" id="cv-contact" value="lamine@email.com · 06 12 34 56 78 · Paris" oninput="renderCV()"></div>
+          <div class="form-group"><label class="form-label">Résumé professionnel</label><textarea class="form-textarea" id="cv-summary" rows="4" oninput="renderCV()">Product Manager expérimenté avec 6 ans d'expertise en IA et data-driven product. Pilotage de roadmaps produits générant +40% d'adoption. Expert en méthodes agiles et OKR.</textarea><button class="btn btn-ghost btn-sm mt-3" id="btn-ai-summary" style="margin-top:8px;align-self:flex-end;" onclick="aiCV('summary')">✨ Générer avec l'IA</button></div>
+        </div>
+        <div class="editor-pane" id="t-exp">
+          <div class="form-group"><label class="form-label">Expériences</label><textarea class="form-textarea" id="cv-exp" rows="8" oninput="renderCV()">Product Manager — TechCorp Paris (2021–aujourd'hui)
+• Pilotage roadmap produit B2B, +40% adoption
+• Management équipe 8 personnes
+• Lancement sur 5 marchés européens
+
+Product Analyst — StartupX (2019–2021)
+• Analyse données, A/B testing, OKR
+• Réduction churn de 15%</textarea></div>
+          <div class="form-group"><label class="form-label">Formation</label><textarea class="form-textarea" id="cv-edu" rows="3" oninput="renderCV()">HEC Paris — Master Management (2018)
+Licence Informatique — Paris VI (2016)</textarea></div>
+        </div>
+        <div class="editor-pane" id="t-skills">
+          <div class="form-group"><label class="form-label">Compétences</label><textarea class="form-textarea" id="cv-skills" rows="3" oninput="renderCV()">Product Management, Agile, Scrum, OKR, Figma, SQL, A/B Testing, Jira, Roadmap, Data Analytics</textarea><button class="btn btn-ghost btn-sm" id="btn-ai-skills" style="margin-top:8px;" onclick="aiCV('skills')">✨ Suggestions IA</button></div>
+          <div class="form-group"><label class="form-label">Langues</label><input class="form-input" id="cv-langs" value="Français (natif) · Anglais (C1) · Espagnol (B1)" oninput="renderCV()"></div>
+          <div style="margin-top:12px;padding:14px;background:rgba(76,175,80,.08);border:1px solid rgba(76,175,80,.2);border-radius:var(--r2);">
+            <div style="font-size:12px;font-weight:700;color:#81C784;margin-bottom:6px;">Score ATS en direct</div>
+            <div style="font-size:26px;font-weight:900;" id="ats-score">82%</div>
+            <div class="progress-bar" style="margin-top:8px;"><div class="progress-fill" id="ats-bar" style="width:82%;background:var(--green);"></div></div>
+          </div>
+        </div>
+        <div class="editor-pane" id="t-tpl">
+          <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">Choisis un template — la prévisualisation se met à jour en direct.</p>
+          <div class="template-grid">
+            <div class="tpl-thumb tpl-ats selected" onclick="selectTpl(this,'ats')">ATS Pro</div>
+            <div class="tpl-thumb tpl-corporate" onclick="selectTpl(this,'corporate')"><span style="color:white">Corporate</span></div>
+            <div class="tpl-thumb tpl-minimal" onclick="selectTpl(this,'minimal')">Minimal</div>
+            <div class="tpl-thumb tpl-startup" onclick="selectTpl(this,'startup')"><span style="color:white">Startup</span></div>
+            <div class="tpl-thumb tpl-creative" onclick="selectTpl(this,'creative')">Créatif</div>
+            <div class="tpl-thumb tpl-modern" onclick="selectTpl(this,'modern')"><span style="color:white">Dark</span></div>
+          </div>
+          <button class="btn btn-primary w-full" style="margin-top:16px;" onclick="window.print()">↓ Exporter PDF</button>
+        </div>
+      </div>
+      <div class="cv-preview"><div class="cv-preview-inner" id="cv-render"></div></div>
+    </div>
+  </div>
+
+  <!-- ═══ VIEW: JOB ANALYZER ═════════════════════════════════════════════ -->
+  <div class="view" id="view-jobs">
+    <div class="analyzer-layout">
+      <div>
+        <div class="card mb-4">
+          <div class="form-group" style="margin-bottom:12px;">
+            <label class="form-label">Texte de l'offre d'emploi</label>
+            <textarea class="form-textarea" id="job-text" rows="10" placeholder="Collez l'offre complète ici...">Product Manager Senior — FinTech Paris
+
+Notre startup recherche un PM Senior pour piloter notre produit de paiements B2B.
+
+Profil : 5+ ans PM, maîtrise Jira, Figma, SQL, A/B Testing, Anglais C1, culture data-driven, OKR, go-to-market, stakeholders, roadmap.</textarea>
+          </div>
+          <div style="background:var(--bg3);border-radius:var(--r2);padding:12px;margin-bottom:12px;">
+            <label class="form-label text-sm" style="display:block;margin-bottom:6px;">Ton profil CV (optionnel)</label>
+            <textarea class="form-textarea" id="cv-ctx" rows="2" placeholder="Résume ton profil...">PM 6 ans, IA, data-driven, Figma, Jira, Agile, OKR, Anglais C1</textarea>
+          </div>
+          <button class="btn btn-primary w-full" id="btn-analyze" onclick="runAnalysis()">
+            <svg width="16" height="16" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Analyser cette offre
+          </button>
+        </div>
+        <div id="job-results" style="display:none;">
+          <div class="card mb-3">
+            <div class="section-title">Mots-clés ATS</div>
+            <div id="job-kws"></div>
+          </div>
+          <div class="card mb-3">
+            <div class="section-title">Candidature générée</div>
+            <div style="display:flex;gap:8px;margin-bottom:12px;">
+              <button class="btn btn-ghost btn-sm" id="gt-letter" onclick="showGen('letter')" style="background:var(--card-hov);">Lettre</button>
+              <button class="btn btn-ghost btn-sm" id="gt-email" onclick="showGen('email')">Email</button>
+              <button class="btn btn-ghost btn-sm" id="gt-pitch" onclick="showGen('pitch')">Pitch 30s</button>
+            </div>
+            <div style="background:var(--bg3);border-radius:var(--r2);padding:14px;font-size:13px;line-height:1.8;white-space:pre-line;max-height:240px;overflow-y:auto;" id="gen-text"></div>
+            <button class="btn btn-ghost btn-sm" style="margin-top:10px;" onclick="copyGen()">📋 Copier</button>
+          </div>
+          <div class="card">
+            <div class="section-title">Recommandations IA</div>
+            <div id="job-recs" style="font-size:13px;line-height:1.9;"></div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div class="card">
+          <div class="score-ring-wrap">
+            <div class="score-ring" id="score-ring" style="--pct:0%"><span class="score-ring-val" id="score-val">—</span></div>
+            <div style="font-size:14px;font-weight:700;">Compatibilité CV</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px;" id="score-sub">Analysez une offre pour voir votre score</div>
+          </div>
+        </div>
+        <div class="card" id="skills-panel" style="display:none;">
+          <div class="section-title">Compétences</div>
+          <div id="skills-list"></div>
+        </div>
+        <div class="card" id="actions-panel" style="display:none;">
+          <div class="section-title">Actions</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <button class="btn btn-ghost btn-sm w-full" style="justify-content:flex-start;" onclick="showView('sim')">🎙️ Simuler l'entretien</button>
+            <button class="btn btn-ghost btn-sm w-full" style="justify-content:flex-start;" onclick="showView('cv')">📄 Adapter mon CV</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ VIEW: DASHBOARD ═══════════════════════════════════════════════ -->
+  <div class="view" id="view-dashboard">
+    <div style="max-width:920px;">
+      <div style="margin-bottom:28px;">
+        <div style="font-size:26px;font-weight:900;margin-bottom:4px;">Bonjour Lamine 👋</div>
+        <div style="color:var(--muted);font-size:13px;">Plateforme IA Carrière · Golléo Premium</div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card pastel-l"><div class="stat-label">Score ATS Moyen</div><div class="stat-value">84%</div><div class="stat-delta">↑ +12% cette semaine</div></div>
+        <div class="stat-card pastel-g"><div class="stat-label">CV Créés</div><div class="stat-value">3</div><div class="stat-delta">2 actifs</div></div>
+        <div class="stat-card pastel-b"><div class="stat-label">Entretiens simulés</div><div class="stat-value">7</div><div class="stat-delta">Score moyen 78/100</div></div>
+        <div class="stat-card pastel-c"><div class="stat-label">Offres analysées</div><div class="stat-value">12</div><div class="stat-delta">3 matchs forts</div></div>
+      </div>
+      <div class="section-title">Modules</div>
+      <div class="features-grid">
+        <div class="feature-card" onclick="showView('sim')">
+          <div class="feature-icon" style="background:rgba(123,94,167,.2);">🎙️</div>
+          <div style="font-size:16px;font-weight:700;">Simulateur d'Entretien IA</div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.6;">Préparez vos entretiens avec Claude. Questions dynamiques, feedback temps réel, scoring multi-dimensions.</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;"><span class="tag">Mode vocal</span><span class="tag">Feedback Claude</span><span class="tag">6 types</span></div>
+        </div>
+        <div class="feature-card" onclick="showView('cv')">
+          <div class="feature-icon" style="background:rgba(196,181,232,.2);">📄</div>
+          <div style="font-size:16px;font-weight:700;">CV Builder Premium</div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.6;">Créez des CV ATS-optimisés avec l'IA. 6 templates, génération IA, export PDF.</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;"><span class="tag">Templates IA</span><span class="tag">Score ATS</span><span class="tag">Export PDF</span></div>
+        </div>
+        <div class="feature-card" onclick="showView('jobs')">
+          <div class="feature-icon" style="background:rgba(179,229,252,.2);">🔍</div>
+          <div style="font-size:16px;font-weight:700;">Analyse IA d'Offres</div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.6;">Analysez chaque offre, matchez avec votre CV, générez candidature complète en 1 clic.</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;"><span class="tag">Matching CV</span><span class="tag">Mots-clés ATS</span><span class="tag">Lettre auto</span></div>
+        </div>
+      </div>
+      <div class="section-title">Progression</div>
+      <div class="card">
+        <div class="grid-2" style="gap:20px;">
+          <div><div style="font-size:13px;font-weight:600;margin-bottom:6px;">Préparation entretien</div><div class="progress-bar"><div class="progress-fill" style="width:70%;background:var(--purple2);"></div></div><div style="font-size:11px;color:var(--muted);margin-top:4px;">7/10 sessions</div></div>
+          <div><div style="font-size:13px;font-weight:600;margin-bottom:6px;">Optimisation CV</div><div class="progress-bar"><div class="progress-fill" style="width:84%;background:var(--green);"></div></div><div style="font-size:11px;color:var(--muted);margin-top:4px;">Score ATS 84%</div></div>
+          <div><div style="font-size:13px;font-weight:600;margin-bottom:6px;">Matching offres</div><div class="progress-bar"><div class="progress-fill" style="width:60%;background:var(--orange);"></div></div><div style="font-size:11px;color:var(--muted);margin-top:4px;">12 offres analysées</div></div>
+          <div><div style="font-size:13px;font-weight:600;margin-bottom:6px;">Profil complété</div><div class="progress-bar"><div class="progress-fill" style="width:85%;background:var(--pastel-b);"></div></div><div style="font-size:11px;color:var(--muted);margin-top:4px;">85% — Ajouter LinkedIn</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-c" id="toast-c"></div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+const QS = {
+  rh:     ["Parlez-moi de vous en 2 minutes — votre parcours, vos motivations, et pourquoi ce poste vous intéresse.",
+           "Quelles sont vos 3 principales forces ? Comment se manifestent-elles concrètement ?",
+           "Décrivez votre plus grande réussite professionnelle et l'impact généré.",
+           "Où vous voyez-vous dans 3 à 5 ans, et comment ce poste s'y inscrit ?",
+           "Pourquoi quittez-vous votre poste actuel et qu'est-ce qui vous attire chez nous ?"],
+  tech:   ["Comment structurez-vous une roadmap produit from scratch ? Quels frameworks utilisez-vous ?",
+           "Décrivez une décision produit difficile prise avec des données insuffisantes.",
+           "Comment priorisez-vous features entre besoins users et objectifs business ?",
+           "Quelle est votre approche pour un A/B test de bout en bout ?",
+           "Comment gérez-vous la dette technique dans votre backlog ?"],
+  star:   ["Racontez une situation où vous avez convaincu un stakeholder difficile.",
+           "Décrivez un échec professionnel significatif. Qu'avez-vous appris ?",
+           "Donnez un exemple de projet piloté avec des ressources très limitées.",
+           "Racontez une décision rapide prise sous forte pression.",
+           "Décrivez un conflit avec un collègue ou manager et sa résolution."],
+  com:    ["Construisez un pitch de 2 minutes pour notre produit face à un prospect sceptique.",
+           "Décrivez votre processus de prospection commerciale de A à Z.",
+           "Comment gérez-vous un client qui dit 'C'est trop cher' ?",
+           "Quelle est votre plus belle vente ? Qu'est-ce qui a fait la différence ?",
+           "Comment qualifiez-vous un lead ?"],
+  startup:["Comment géreriez-vous un pivot produit avec 5 personnes et 3 mois de runway ?",
+           "Comment valideriez-vous une hypothèse produit avec le minimum de ressources ?",
+           "Comment créez-vous une culture d'ownership dans une petite équipe ?",
+           "Décrivez comment vous construiriez la traction 0→1 d'un nouveau produit.",
+           "Comment arbitrez-vous entre vitesse et qualité en startup ?"],
+  ecole:  ["Quelle est votre vision de la transformation numérique dans votre secteur ?",
+           "Comment aborderiez-vous l'entrée d'un concurrent disruptif sur votre marché ?",
+           "Quels sont selon vous les 3 enjeux majeurs des entreprises françaises en 2025 ?",
+           "Budget -20%, délai -30%, périmètre identique — que faites-vous ?",
+           "La France doit-elle investir massivement dans l'IA ? Arguments pour et contre."]
+};
+const KWS = {
+  rh:['motivations','compétences','parcours','équipe','impact','résultats','leadership','objectifs'],
+  tech:['roadmap','agile','données','sprint','backlog','OKR','métriques','A/B','scalabilité'],
+  star:['situation','résultat','action','défi','équipe','décision','conflit','priorité'],
+  com:['client','prospect','deal','objection','pipeline','fidélisation','argument','chiffre'],
+  startup:['pivot','traction','validation','MVP','runway','growth','produit','scalable'],
+  ecole:['stratégie','analyse','marché','performance','innovation','risque','valeur','gouvernance']
+};
+const FILLERS = ['euh','heu','ben','bah','donc','genre','voilà','quoi','hm','alors'];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let mode='rh', jobTitle='Product Manager', qIdx=0, answers=[], recog=null, isRec=false;
+let timerSec=0, timerInt=null, curTranscript='', cvTpl='ats', genTab='letter';
+let genTexts={letter:'',email:'',pitch:''};
+
+// ── NAVIGATION ────────────────────────────────────────────────────────────────
+const META={
+  sim:{title:"Simulateur d'Entretien IA",sub:"Entraîne-toi comme avec un vrai recruteur — feedback Claude en temps réel"},
+  cv:{title:"CV Builder Premium",sub:"Crée ton CV ATS-optimisé avec l'IA — templates, génération, export PDF"},
+  jobs:{title:"Analyse d'Offres IA",sub:"Analyse chaque offre, matche avec ton CV, génère ta candidature en 1 clic"},
+  dashboard:{title:"Tableau de bord",sub:"Vue d'ensemble de ta progression Golléo"}
+};
+
+function showView(v){
+  // BUG FIX: masquer toutes les vues y compris view-sim qui avait un inline style
+  document.querySelectorAll('.view').forEach(e=>{
+    e.classList.remove('active');
+    e.style.display='none';
+  });
+  document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));
+
+  const el=document.getElementById('view-'+v);
+  el.classList.add('active');
+  // view-sim a besoin de flex, les autres de block
+  el.style.display = (v==='sim') ? 'flex' : 'block';
+
+  const n=document.getElementById('nav-'+v);
+  if(n) n.classList.add('active');
+  const m=META[v]||{};
+  document.getElementById('topbar-title').textContent=m.title||'';
+  document.getElementById('topbar-sub').textContent=m.sub||'';
+  if(v==='cv') renderCV();
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+function toast(msg,icon='✅',ms=3500){
+  const c=document.getElementById('toast-c');
+  const t=document.createElement('div');
+  t.className='toast';
+  // Utiliser textContent pour éviter XSS
+  const iconEl=document.createElement('span');
+  iconEl.style.fontSize='18px';
+  iconEl.textContent=icon;
+  const msgEl=document.createElement('span');
+  msgEl.style.cssText='font-size:13px;font-weight:500;';
+  msgEl.textContent=msg;
+  t.appendChild(iconEl);
+  t.appendChild(msgEl);
+  c.appendChild(t);
+  setTimeout(()=>t.remove(),ms);
+}
+
+// ── MODE SELECT ───────────────────────────────────────────────────────────────
+function selectMode(el,m){
+  document.querySelectorAll('.mode-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  mode=m;
+}
+
+// ── INTERVIEW ─────────────────────────────────────────────────────────────────
+function startInterview(){
+  jobTitle=document.getElementById('sim-job').value||'Product Manager';
+  qIdx=0;answers=[];curTranscript='';
+  document.getElementById('sim-setup').style.display='none';
+  document.getElementById('sim-results').style.display='none';
+  document.getElementById('sim-room').classList.add('active');
+  document.getElementById('room-label').textContent=`${modeName(mode)} — ${jobTitle}`;
+  loadQ();
+  startTimer();
+  setTimeout(()=>speak(QS[mode][0]),600);
+}
+function modeName(m){
+  return{rh:'Entretien RH',tech:'Technique',star:'Comportemental',com:'Commercial',startup:'Startup',ecole:'Grandes Écoles'}[m]||m;
+}
+function loadQ(){
+  const qs=QS[mode];
+  document.getElementById('cur-q').textContent=qs[qIdx]||'Entretien terminé.';
+  document.getElementById('q-counter').textContent=`Q ${qIdx+1}/${qs.length}`;
+  document.getElementById('transcript').innerHTML='<span class="text-muted">Appuie sur le micro et parle...</span>';
+  document.getElementById('filler-n').textContent='0';
+  document.getElementById('filler-list').textContent='';
+  document.getElementById('kw-list').innerHTML='<span class="text-muted text-sm">En attente...</span>';
+  document.getElementById('live-score').textContent='—';
+  document.getElementById('live-score-sub').textContent='Basé sur ta dernière réponse';
+  document.getElementById('tip-card').style.display='none';
+  curTranscript='';
+  stopMicUI();
+}
+function speak(text){
+  if(!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='fr-FR';
+  u.rate=.95;
+  const voices=window.speechSynthesis.getVoices();
+  const v=voices.find(x=>x.lang.startsWith('fr'));
+  if(v) u.voice=v;
+  window.speechSynthesis.speak(u);
+}
+function toggleMic(){isRec?stopRec():startRec();}
+function startRec(){
+  const R=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!R){
+    toast("Reconnaissance vocale non supportée dans ce navigateur. Utilisez Chrome ou tapez votre réponse.","⚠️",5000);
+    return;
+  }
+  recog=new R();
+  recog.lang='fr-FR';
+  recog.continuous=true;
+  recog.interimResults=true;
+  let fin='';
+  recog.onresult=e=>{
+    let interim='';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal) fin+=e.results[i][0].transcript+' ';
+      else interim=e.results[i][0].transcript;
+    }
+    curTranscript=fin+interim;
+    const el=document.getElementById('transcript');
+    // Utiliser textContent + cursor séparé pour éviter les problèmes DOM
+    el.textContent=curTranscript;
+    const cursor=document.createElement('span');
+    cursor.className='cursor';
+    el.appendChild(cursor);
+    liveAnalyze(curTranscript);
+  };
+  recog.onerror=e=>{
+    stopRec();
+    if(e.error!=='aborted') toast("Micro interrompu: "+e.error,"⚠️");
+  };
+  recog.onend=()=>{if(isRec) recog.start();};
+  recog.start();
+  isRec=true;
+  document.getElementById('mic-btn').classList.add('recording');
+  document.getElementById('mic-hint').textContent='Écoute en cours...';
+}
+function stopRec(){
+  if(recog){recog.stop();recog=null;}
+  isRec=false;
+  stopMicUI();
+}
+function stopMicUI(){
+  document.getElementById('mic-btn').classList.remove('recording');
+  document.getElementById('mic-hint').textContent='Clique pour parler';
+}
+function liveAnalyze(text){
+  const ws=text.trim().split(/\s+/).filter(Boolean);
+  const n=ws.length;
+  const el=Math.max(timerSec,10);
+  const wpmV=Math.round((n/el)*60);
+  document.getElementById('wpm').textContent=wpmV+' wpm';
+  const pct=Math.min(100,Math.round((wpmV/160)*100));
+  document.getElementById('wpm-bar').style.width=pct+'%';
+  document.getElementById('wpm-bar').style.background=wpmV<80?'#FF9800':wpmV>180?'#F44336':'#4CAF50';
+  const lower=text.toLowerCase();
+  const fl=[];
+  FILLERS.forEach(f=>{
+    const m=lower.match(new RegExp('\\b'+f+'\\b','gi'));
+    if(m) m.forEach(()=>fl.push(f));
+  });
+  document.getElementById('filler-n').textContent=fl.length;
+  document.getElementById('filler-list').textContent=fl.length?'"'+[...new Set(fl)].join('","')+'"':'';
+  const kws=KWS[mode]||[];
+  const det=kws.filter(k=>lower.includes(k));
+  const mis=kws.filter(k=>!lower.includes(k)).slice(0,3);
+  if(det.length||mis.length){
+    const container=document.getElementById('kw-list');
+    container.innerHTML='';
+    det.forEach(k=>{const s=document.createElement('span');s.className='kw-chip';s.textContent=k;container.appendChild(s);});
+    mis.forEach(k=>{const s=document.createElement('span');s.className='kw-chip bad';s.textContent=k;container.appendChild(s);});
+  }
+}
+
+async function submitAnswer(){
+  stopRec();
+  const ans=curTranscript.trim()||document.getElementById('transcript').textContent.trim()||(()=>{
+    // Permettre saisie clavier si pas de vocal
+    const t=prompt('Votre réponse (ou annulez pour passer) :');
+    return t||'(Pas de réponse)';
+  })();
+  if(!ans||ans==='(Pas de réponse)'){skipQ();return;}
+
+  const btn=document.getElementById('btn-validate');
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner"></span> Analyse IA...';
+  document.getElementById('live-score').innerHTML='<span class="spinner"></span>';
+
+  try {
+    const res=await fetch('/api/interview/feedback',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({question:QS[mode][qIdx],answer:ans,mode,jobTitle})
+    });
+    if(!res.ok) throw new Error('API '+res.status);
+    const sc=await res.json();
+    document.getElementById('live-score').textContent=sc.g+'/100';
+    document.getElementById('live-score').style.color=sc.g>=75?'var(--green)':sc.g>=55?'var(--orange)':'var(--red)';
+    document.getElementById('live-score-sub').textContent='Score Claude IA';
+    if(sc.tip){
+      document.getElementById('tip-text').textContent=sc.tip;
+      document.getElementById('tip-card').style.display='block';
+    }
+    answers.push({q:QS[mode][qIdx],a:ans,sc});
+    toast(`Réponse analysée — ${sc.g}/100`,'✅');
+  } catch(e) {
+    // Fallback local si API indisponible
+    const sc=scoreLocal(ans);
+    document.getElementById('live-score').textContent=sc.g+'/100';
+    document.getElementById('live-score').style.color=sc.g>=75?'var(--green)':sc.g>=55?'var(--orange)':'var(--red)';
+    answers.push({q:QS[mode][qIdx],a:ans,sc});
+    toast(`Réponse enregistrée — ${sc.g}/100 (mode hors-ligne)`,'⚡');
+  }
+
+  btn.disabled=false;
+  btn.innerHTML='✓ Valider ma réponse';
+  if(qIdx<QS[mode].length-1){
+    qIdx++;
+    setTimeout(()=>{loadQ();speak(QS[mode][qIdx]);},1400);
+  } else {
+    setTimeout(showResults,1400);
+  }
+}
+
+function scoreLocal(text){
+  const ws=text.trim().split(/\s+/).filter(Boolean).length;
+  const lower=text.toLowerCase();
+  const kwhits=(KWS[mode]||[]).filter(k=>lower.includes(k)).length;
+  const fl=FILLERS.filter(f=>new RegExp('\\b'+f+'\\b','i').test(lower)).length;
+  const p=Math.min(100,Math.max(20,45+kwhits*8+Math.min(20,Math.floor(ws/5))));
+  const s=Math.min(100,Math.max(20,ws>50?75:ws>20?60:35));
+  const i=Math.min(100,Math.max(20,/\d+%|\d+ (ans|mois|équipe|personnes)/i.test(text)?80:55));
+  const f=Math.min(100,Math.max(20,Math.max(0,85-fl*8)));
+  return{g:Math.round((p+s+i+f)/4),p,s,i,f,tip:''};
+}
+
+function skipQ(){
+  stopRec();
+  answers.push({q:QS[mode][qIdx],a:"(Passée)",sc:{g:0,p:0,s:0,i:0,f:0,tip:''}});
+  if(qIdx<QS[mode].length-1){qIdx++;loadQ();speak(QS[mode][qIdx]);}
+  else showResults();
+}
+
+function endInterview(){
+  stopRec();stopTimer();
+  if(!answers.length){
+    document.getElementById('sim-room').classList.remove('active');
+    document.getElementById('sim-setup').style.display='block';
+    return;
+  }
+  showResults();
+}
+
+function showResults(){
+  stopRec();stopTimer();
+  document.getElementById('sim-room').classList.remove('active');
+  document.getElementById('sim-results').style.display='flex';
+  const done=answers.filter(a=>a.sc.g>0);
+  if(!done.length){resetSim();return;}
+  const avg=k=>Math.round(done.reduce((a,b)=>a+b.sc[k],0)/done.length);
+  const g=avg('g');
+  const mention=g>=85?'Excellent':g>=72?'Bon niveau':g>=58?'Correct':'À améliorer';
+  const mc=g>=85?'var(--green)':g>=72?'var(--purple2)':g>=58?'var(--orange)':'var(--red)';
+  document.getElementById('res-score').innerHTML=g+'<span style="font-size:36px;color:var(--muted);">/100</span>';
+  document.getElementById('res-mention').textContent=mention;
+  document.getElementById('res-mention').style.color=mc;
+  document.getElementById('rd-p').textContent=avg('p');
+  document.getElementById('rd-s').textContent=avg('s');
+  document.getElementById('rd-i').textContent=avg('i');
+  document.getElementById('rd-f').textContent=avg('f');
+  const str=[],gap=[];
+  if(avg('p')>=70)str.push('✓ Réponses pertinentes et orientées métier');
+  if(avg('s')>=70)str.push('✓ Bonne structure avec exemples concrets');
+  if(avg('i')>=70)str.push('✓ Impact chiffré mis en avant');
+  if(avg('f')>=70)str.push('✓ Expression fluide, peu de mots parasites');
+  if(!str.length)str.push("✓ Tu as participé à l'entretien complet — bon départ !");
+  if(avg('p')<70)gap.push('→ Utilise plus de mots-clés métier dans tes réponses');
+  if(avg('s')<70)gap.push('→ Structure avec la méthode STAR');
+  if(avg('i')<70)gap.push('→ Quantifie tes réalisations avec des chiffres');
+  if(avg('f')<70)gap.push('→ Réduis les mots parasites (euh, ben, donc...)');
+  const sEl=document.getElementById('res-strengths');
+  const gEl=document.getElementById('res-gaps');
+  sEl.innerHTML='';gEl.innerHTML='';
+  str.forEach(s=>{const d=document.createElement('div');d.textContent=s;sEl.appendChild(d);});
+  gap.forEach(g=>{const d=document.createElement('div');d.textContent=g;gEl.appendChild(d);});
+  const bEl=document.getElementById('res-breakdown');
+  bEl.innerHTML='';
+  answers.forEach((a,i)=>{
+    const card=document.createElement('div');
+    card.className='answer-card';
+    if(a.sc.g>0){
+      const q=document.createElement('div');
+      q.style.cssText='font-size:13px;font-weight:700;color:var(--lavender);margin-bottom:6px;';
+      q.textContent=`Q${i+1}. ${a.q}`;
+      const ans=document.createElement('div');
+      ans.style.cssText='font-size:12px;color:var(--muted);font-style:italic;margin-bottom:8px;';
+      ans.textContent=`"${a.a.slice(0,200)}${a.a.length>200?'...':''}"`;
+      const badges=document.createElement('div');
+      badges.style.cssText='display:flex;gap:8px;flex-wrap:wrap;';
+      badges.innerHTML=`<span class="badge badge-purple">Score ${a.sc.g}/100</span>
+        <span class="badge" style="background:rgba(179,229,252,.2);color:var(--pastel-b);">Pertinence ${a.sc.p}</span>
+        <span class="badge" style="background:rgba(200,230,201,.2);color:var(--pastel-g);">Structure ${a.sc.s}</span>
+        <span class="badge" style="background:rgba(255,204,188,.2);color:var(--pastel-c);">Impact ${a.sc.i}</span>`;
+      if(a.sc.tip){
+        const tip=document.createElement('div');
+        tip.style.cssText='margin-top:8px;font-size:12px;color:var(--lavender);padding:6px 10px;background:rgba(123,94,167,.1);border-radius:8px;';
+        tip.textContent='💡 '+a.sc.tip;
+        card.appendChild(q);card.appendChild(ans);card.appendChild(badges);card.appendChild(tip);
+      } else {
+        card.appendChild(q);card.appendChild(ans);card.appendChild(badges);
+      }
+    } else {
+      const d=document.createElement('div');
+      d.style.cssText='font-size:13px;font-weight:700;color:var(--lavender);margin-bottom:6px;';
+      d.textContent=`Q${i+1}. ${a.q}`;
+      const s=document.createElement('span');
+      s.className='text-muted text-sm';
+      s.textContent='Passée';
+      card.appendChild(d);card.appendChild(s);
+    }
+    bEl.appendChild(card);
+  });
+}
+
+function resetSim(){
+  document.getElementById('sim-results').style.display='none';
+  document.getElementById('sim-room').classList.remove('active');
+  document.getElementById('sim-setup').style.display='block';
+  answers=[];qIdx=0;timerSec=0;
+  document.getElementById('timer').textContent='00:00';
+}
+function startTimer(){
+  timerSec=0;
+  timerInt=setInterval(()=>{
+    timerSec++;
+    const m=String(Math.floor(timerSec/60)).padStart(2,'0');
+    const s=String(timerSec%60).padStart(2,'0');
+    const el=document.getElementById('timer');
+    el.textContent=`${m}:${s}`;
+    el.classList.toggle('urgent',timerSec>120);
+  },1000);
+}
+function stopTimer(){clearInterval(timerInt);timerInt=null;}
+
+// ── CV BUILDER ────────────────────────────────────────────────────────────────
+function cvTab(el,id){
+  document.querySelectorAll('.editor-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.editor-pane').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(id).classList.add('active');
+}
+function selectTpl(el,t){
+  document.querySelectorAll('.tpl-thumb').forEach(x=>x.classList.remove('selected'));
+  el.classList.add('selected');
+  cvTpl=t;
+  renderCV();
+}
+function renderCV(){
+  const name=document.getElementById('cv-name')?.value||'';
+  const title=document.getElementById('cv-title')?.value||'';
+  const contact=document.getElementById('cv-contact')?.value||'';
+  const summary=document.getElementById('cv-summary')?.value||'';
+  const exp=document.getElementById('cv-exp')?.value||'';
+  const edu=document.getElementById('cv-edu')?.value||'';
+  const skills=document.getElementById('cv-skills')?.value||'';
+  const langs=document.getElementById('cv-langs')?.value||'';
+  const sl=skills.split(',').map(s=>s.trim()).filter(Boolean);
+  const ats=Math.min(99,Math.max(40,50+sl.length*3+(summary.length>100?10:0)+(exp.length>200?10:0)));
+  const ael=document.getElementById('ats-score');
+  const bar=document.getElementById('ats-bar');
+  if(ael) ael.textContent=ats+'%';
+  if(bar){bar.style.width=ats+'%';bar.style.background=ats>=80?'#4CAF50':ats>=60?'#FF9800':'#F44336';}
+  const T={
+    ats:{hBg:'#fff',hC:'#1A1040',acc:'#7B5EA7',tC:'#7B5EA7',bl:''},
+    corporate:{hBg:'#1A237E',hC:'#fff',acc:'#283593',tC:'rgba(255,255,255,.7)',bl:''},
+    minimal:{hBg:'#fff',hC:'#1A1040',acc:'#7B5EA7',tC:'#555',bl:'border-left:4px solid #7B5EA7;padding-left:16px;'},
+    startup:{hBg:'linear-gradient(135deg,#7B5EA7,#C4B5E8)',hC:'#fff',acc:'#7B5EA7',tC:'rgba(255,255,255,.8)',bl:''},
+    creative:{hBg:'linear-gradient(135deg,#FF8A65,#FFE0B2)',hC:'#4E342E',acc:'#E64A19',tC:'#5D4037',bl:''},
+    modern:{hBg:'#212121',hC:'#fff',acc:'#9B7DD4',tC:'#B39DDB',bl:''}
+  };
+  const s=T[cvTpl]||T.ats;
+  // Échapper les caractères HTML pour éviter injection
+  const esc=t=>t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const expLines=exp.split('\n').map(l=>{
+    if(l.startsWith('•')) return `<li style="font-size:11px;color:#444;margin-bottom:2px;">${esc(l.slice(1).trim())}</li>`;
+    return l.trim()?`<p style="font-weight:700;font-size:11px;color:#222;margin-top:6px;">${esc(l)}</p>`:'';
+  }).join('');
+  const eduLines=edu.split('\n').filter(Boolean).map(l=>`<p style="font-size:11px;color:#444;margin-bottom:3px;">${esc(l)}</p>`).join('');
+  document.getElementById('cv-render').innerHTML=`
+<div style="${s.bl}">
+<div style="background:${s.hBg};margin:-32px -32px 20px;padding:26px 32px;">
+  <div style="font-size:22px;font-weight:900;color:${s.hC};">${esc(name)}</div>
+  <div style="font-size:13px;font-weight:600;color:${s.tC};margin-top:4px;">${esc(title)}</div>
+  <div style="font-size:11px;color:${s.tC};opacity:.8;margin-top:7px;">${esc(contact)}</div>
+</div>
+${summary?`<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:${s.acc};border-bottom:2px solid ${s.acc};padding-bottom:3px;margin-bottom:8px;">Profil</div><p style="font-size:11px;line-height:1.7;color:#444;margin-bottom:14px;">${esc(summary)}</p>`:''}
+${exp?`<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:${s.acc};border-bottom:2px solid ${s.acc};padding-bottom:3px;margin-bottom:8px;">Expériences</div><div style="margin-bottom:14px;"><ul style="padding-left:12px;margin:0;">${expLines}</ul></div>`:''}
+${edu?`<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:${s.acc};border-bottom:2px solid ${s.acc};padding-bottom:3px;margin-bottom:8px;">Formation</div><div style="margin-bottom:14px;">${eduLines}</div>`:''}
+${sl.length?`<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:${s.acc};border-bottom:2px solid ${s.acc};padding-bottom:3px;margin-bottom:8px;">Compétences</div><div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px;">${sl.map(sk=>`<span style="background:#F3E5F5;color:#4A148C;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;">${esc(sk)}</span>`).join('')}</div>`:''}
+${langs?`<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:${s.acc};border-bottom:2px solid ${s.acc};padding-bottom:3px;margin-bottom:6px;">Langues</div><p style="font-size:11px;color:#444;">${esc(langs)}</p>`:''}
+</div>`;
+}
+
+async function aiCV(f){
+  const btnId={title:'btn-ai-title',summary:'btn-ai-summary',skills:'btn-ai-skills'}[f];
+  const btn=document.getElementById(btnId);
+  const orig=btn.textContent;
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner"></span>';
+  try {
+    const jobTitleCV=document.getElementById('cv-title')?.value||'Professionnel';
+    const currentVal=f==='skills'?document.getElementById('cv-skills')?.value:
+                     f==='summary'?document.getElementById('cv-summary')?.value:'';
+    const res=await fetch('/api/cv/generate',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({type:f,currentValue:currentVal,jobTitle:jobTitleCV})
+    });
+    if(!res.ok) throw new Error('API '+res.status);
+    const {generated}=await res.json();
+    if(f==='title') document.getElementById('cv-title').value=generated;
+    else if(f==='summary') document.getElementById('cv-summary').value=generated;
+    else if(f==='skills'){
+      const c=document.getElementById('cv-skills').value;
+      document.getElementById('cv-skills').value=c+(c?', ':'')+generated;
+    }
+    renderCV();
+    toast('Généré par Claude ✨','✨');
+  } catch(e) {
+    toast('Erreur IA — vérifiez que le serveur est lancé','❌');
+  }
+  btn.disabled=false;
+  btn.textContent=orig;
+}
+
+// ── JOB ANALYZER ──────────────────────────────────────────────────────────────
+async function runAnalysis(){
+  const text=document.getElementById('job-text').value;
+  const cv=document.getElementById('cv-ctx').value;
+  if(text.trim().length<30){toast('Collez une offre plus complète','⚠️');return;}
+
+  const btn=document.getElementById('btn-analyze');
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner"></span> Analyse Claude en cours...';
+  toast('Analyse IA en cours...','🔍',3000);
+
+  try {
+    const res=await fetch('/api/jobs/analyze',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({jobText:text,cvProfile:cv})
+    });
+    if(!res.ok) throw new Error('API '+res.status);
+    const data=await res.json();
+
+    // Score ring
+    document.getElementById('score-ring').style.setProperty('--pct',data.score+'%');
+    document.getElementById('score-val').textContent=data.score+'%';
+    document.getElementById('score-sub').textContent=
+      data.score>=75?'Fort matching — candidate !':data.score>=55?'Matching correct':'Matching faible — optimise ton CV';
+
+    // Keywords
+    const kwEl=document.getElementById('job-kws');
+    kwEl.innerHTML='';
+    (data.keywords||[]).forEach(k=>{
+      const s=document.createElement('span');
+      s.className='chip '+(k.present?'chip-match':'chip-miss');
+      s.textContent=(k.present?'✓ ':'✗ ')+k.word;
+      kwEl.appendChild(s);
+    });
+
+    // Skills
+    const skEl=document.getElementById('skills-list');
+    skEl.innerHTML='';
+    (data.skills||[]).forEach(s=>{
+      const d=document.createElement('div');
+      d.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;';
+      const name=document.createElement('span');
+      name.textContent=s.name;
+      const badge=document.createElement('span');
+      badge.className='badge '+(s.status==='present'?'badge-green':s.status==='partial'?'badge-orange':'badge-red');
+      badge.textContent=s.status==='present'?'✓ Présent':s.status==='partial'?'~ Partiel':'✗ Manquant';
+      d.appendChild(name);d.appendChild(badge);
+      skEl.appendChild(d);
+    });
+
+    // Generated texts
+    genTexts={
+      letter:data.letter||'',
+      email:data.email||'',
+      pitch:data.pitch||''
+    };
+    showGen('letter');
+
+    // Recommendations
+    const recEl=document.getElementById('job-recs');
+    recEl.innerHTML='';
+    (data.recommendations||[]).forEach(r=>{
+      const d=document.createElement('div');
+      d.style.cssText='padding:6px 0;border-bottom:1px solid var(--border);';
+      d.textContent='→ '+r;
+      recEl.appendChild(d);
+    });
+
+    document.getElementById('job-results').style.display='block';
+    document.getElementById('skills-panel').style.display='block';
+    document.getElementById('actions-panel').style.display='block';
+    toast('Analyse Claude terminée ✅','✅');
+  } catch(e) {
+    toast('Erreur analyse — vérifiez que le serveur est lancé (npm run dev)','❌',5000);
+  }
+
+  btn.disabled=false;
+  btn.innerHTML='<svg width="16" height="16" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Analyser cette offre';
+}
+
+function showGen(tab){
+  genTab=tab;
+  ['letter','email','pitch'].forEach(t=>{
+    const e=document.getElementById('gt-'+t);
+    if(e) e.style.background=t===tab?'var(--card-hov)':'';
+  });
+  document.getElementById('gen-text').textContent=genTexts[tab]||'';
+}
+function copyGen(){
+  navigator.clipboard.writeText(genTexts[genTab]||'').then(()=>toast('Copié !','📋'));
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+window.addEventListener('load',()=>{
+  renderCV();
+  if(window.speechSynthesis){
+    window.speechSynthesis.onvoiceschanged=()=>window.speechSynthesis.getVoices();
+    window.speechSynthesis.getVoices();
+  }
+  showView('sim');
+  // Vérifier santé du serveur API
+  fetch('/api/health').then(r=>{
+    if(!r.ok) throw new Error();
+  }).catch(()=>{
+    const s=document.getElementById('ai-status');
+    s.className='badge badge-orange';
+    s.innerHTML='<svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="currentColor"/></svg> Serveur IA offline';
+    toast('Serveur API non détecté. Lancez : npm run dev','⚠️',6000);
+  });
+});
+</script>
+</body>
+</html>
