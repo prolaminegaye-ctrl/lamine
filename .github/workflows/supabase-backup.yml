@@ -1,0 +1,42 @@
+name: Supabase Daily Backup
+
+on:
+  schedule:
+    - cron: '0 3 * * *'   # chaque nuit à 3h UTC (4h Paris / 3h Dakar)
+  workflow_dispatch:       # possibilité de lancer manuellement
+
+jobs:
+  backup:
+    name: Export Supabase Data
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install @supabase/supabase-js
+        working-directory: /tmp
+
+      - name: Run backup script
+        env:
+          SUPABASE_URL: ${{ secrets.BACKUP_SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.BACKUP_SUPABASE_SERVICE_KEY }}
+        run: node scripts/backup-supabase.mjs
+
+      - name: Commit backup files
+        run: |
+          git config user.name "ETAGIA Backup Bot"
+          git config user.email "backup@etagia.com"
+          git add backups/
+          if git diff --staged --quiet; then
+            echo "Aucune donnée nouvelle — backup ignoré"
+          else
+            git commit -m "backup: snapshot automatique $(date -u '+%Y-%m-%d %H:%M UTC')"
+            git push origin ${{ github.ref_name }}
+          fi
