@@ -24,14 +24,14 @@ export default function Sidebar() {
 
   return (
     <aside className="w-60 flex flex-col h-screen sticky top-0"
-      style={{ background: 'var(--surface)', borderRight: '1px solid var(--border)' }}>
+      style={{ background: 'var(--paper)', borderRight: '1px solid var(--line)' }}>
       {/* Logo */}
-      <div className="p-5 flex items-center gap-3" style={{ borderBottom: '1px solid var(--border)' }}>
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold"
-          style={{ background: 'var(--accent)' }}>E</div>
+      <div className="p-5 flex items-center gap-3" style={{ borderBottom: '1px solid var(--line)' }}>
+        <div className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold"
+          style={{ background: 'var(--red)' }}>F</div>
         <div>
-          <div className="font-bold text-sm" style={{ color: 'var(--text)' }}>ETAGIA</div>
-          <div className="text-xs" style={{ color: 'var(--text-muted)' }}>LMS Platform</div>
+          <div className="font-bold text-sm" style={{ color: 'var(--ink)' }}>ETAGIA</div>
+          <div className="text-xs" style={{ color: 'var(--ink-mut)' }}>LMS Platform</div>
         </div>
       </div>
 
@@ -47,7 +47,7 @@ export default function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="p-3" style={{ borderTop: '1px solid var(--border)' }}>
+      <div className="p-3" style={{ borderTop: '1px solid var(--line)' }}>
         <button onClick={handleLogout} className="sidebar-link w-full">
           <LogOut size={18} />
           <span>Déconnexion</span>

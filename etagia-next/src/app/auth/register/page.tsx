@@ -31,42 +31,42 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'var(--bg)' }}>
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'var(--paper)' }}>
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4" style={{ background: 'var(--accent)' }}>
-            <span className="text-white text-2xl font-bold">E</span>
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4" style={{ background: 'var(--red)' }}>
+            <span className="text-white text-2xl font-bold">F</span>
           </div>
-          <h1 className="text-3xl font-bold" style={{ color: 'var(--text)' }}>ETAGIA</h1>
-          <p style={{ color: 'var(--text-muted)' }} className="mt-1">Créez votre compte</p>
+          <h1 className="text-3xl font-bold" style={{ color: 'var(--ink)' }}>ETAGIA</h1>
+          <p style={{ color: 'var(--ink-mut)' }} className="mt-1">Créez votre compte</p>
         </div>
 
         <div className="card p-8">
-          <h2 className="text-xl font-semibold mb-6" style={{ color: 'var(--text)' }}>Inscription</h2>
+          <h2 className="text-xl font-semibold mb-6" style={{ color: 'var(--ink)' }}>Inscription</h2>
 
           {error && (
-            <div className="mb-4 p-3 rounded-lg text-sm" style={{ background: 'rgba(239,68,68,0.15)', color: '#f87171' }}>
+            <div className="mb-4 p-3 rounded-lg text-sm" style={{ background: 'var(--red-soft)', color: 'var(--red-deep)' }}>
               {error}
             </div>
           )}
 
           <form onSubmit={handleRegister} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-muted)' }}>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--ink-mut)' }}>
                 Nom complet
               </label>
               <input type="text" className="input-field" placeholder="Votre nom" value={fullName}
                 onChange={e => setFullName(e.target.value)} required />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-muted)' }}>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--ink-mut)' }}>
                 Email
               </label>
               <input type="email" className="input-field" placeholder="vous@exemple.com" value={email}
                 onChange={e => setEmail(e.target.value)} required />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-muted)' }}>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--ink-mut)' }}>
                 Mot de passe
               </label>
               <input type="password" className="input-field" placeholder="Min. 6 caractères" value={password}
@@ -77,9 +77,9 @@ export default function RegisterPage() {
             </button>
           </form>
 
-          <p className="text-center mt-6 text-sm" style={{ color: 'var(--text-muted)' }}>
+          <p className="text-center mt-6 text-sm" style={{ color: 'var(--ink-mut)' }}>
             Déjà un compte ?{' '}
-            <Link href="/auth/login" style={{ color: 'var(--accent)' }} className="font-medium hover:underline">
+            <Link href="/auth/login" style={{ color: 'var(--red)' }} className="font-medium hover:underline">
               Se connecter
             </Link>
           </p>

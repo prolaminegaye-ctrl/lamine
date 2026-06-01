@@ -19,34 +19,34 @@ export default async function DashboardPage() {
     : 0
 
   const stats = [
-    { label: 'Cours inscrits', value: enrollments?.length ?? 0, icon: BookOpen, color: '#E8794A' },
-    { label: 'Progression moy.', value: `${totalProgress}%`, icon: TrendingUp, color: '#22c55e' },
-    { label: 'Heures apprises', value: '12h', icon: Clock, color: '#3b82f6' },
-    { label: 'Certificats', value: 0, icon: Award, color: '#a855f7' },
+    { label: 'Cours inscrits', value: enrollments?.length ?? 0, icon: BookOpen, color: 'var(--red)', bg: 'var(--red-soft)' },
+    { label: 'Progression moy.', value: `${totalProgress}%`, icon: TrendingUp, color: 'var(--green)', bg: 'var(--green-soft)' },
+    { label: 'Heures apprises', value: '12h', icon: Clock, color: 'var(--gold)', bg: 'var(--gold-soft)' },
+    { label: 'Certificats', value: 0, icon: Award, color: 'var(--sage)', bg: 'var(--sage-soft)' },
   ]
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>
+        <h1 className="text-2xl font-bold" style={{ color: 'var(--ink)' }}>
           Bonjour, {profile?.full_name || user?.email?.split('@')[0]} 👋
         </h1>
-        <p style={{ color: 'var(--text-muted)' }} className="mt-1">Continuez votre apprentissage</p>
+        <p style={{ color: 'var(--ink-mut)' }} className="mt-1">Continuez votre apprentissage</p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {stats.map(({ label, value, icon: Icon, color }) => (
+        {stats.map(({ label, value, icon: Icon, color, bg }) => (
           <div key={label} className="card p-5">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-sm" style={{ color: 'var(--text-muted)' }}>{label}</span>
+              <span className="text-sm" style={{ color: 'var(--ink-mut)' }}>{label}</span>
               <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-                style={{ background: `${color}20` }}>
+                style={{ background: bg }}>
                 <Icon size={16} style={{ color }} />
               </div>
             </div>
-            <div className="text-2xl font-bold" style={{ color: 'var(--text)' }}>{value}</div>
+            <div className="text-2xl font-bold" style={{ color: 'var(--ink)' }}>{value}</div>
           </div>
         ))}
       </div>
@@ -54,33 +54,33 @@ export default async function DashboardPage() {
       {/* My courses */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold" style={{ color: 'var(--text)' }}>Mes cours</h2>
-          <Link href="/catalog" className="text-sm" style={{ color: 'var(--accent)' }}>Voir le catalogue →</Link>
+          <h2 className="text-lg font-semibold" style={{ color: 'var(--ink)' }}>Mes cours</h2>
+          <Link href="/catalog" className="text-sm" style={{ color: 'var(--red)' }}>Voir le catalogue →</Link>
         </div>
 
         {(!enrollments || enrollments.length === 0) ? (
           <div className="card p-12 text-center">
-            <BookOpen size={40} style={{ color: 'var(--text-muted)' }} className="mx-auto mb-3" />
-            <p style={{ color: 'var(--text-muted)' }}>Aucun cours en cours. Explorez le catalogue !</p>
+            <BookOpen size={40} style={{ color: 'var(--ink-mut)' }} className="mx-auto mb-3" />
+            <p style={{ color: 'var(--ink-mut)' }}>Aucun cours en cours. Explorez le catalogue !</p>
             <Link href="/catalog" className="btn-primary mt-4 inline-flex">Parcourir les cours</Link>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {enrollments.map((e: any) => (
-              <Link key={e.id} href={`/course/${e.course?.id}`} className="card p-4 hover:border-[var(--accent)] transition-colors block">
+              <Link key={e.id} href={`/course/${e.course?.id}`} className="card p-4 hover:border-[var(--red)] transition-colors block">
                 <div className="w-full h-32 rounded-lg mb-3 flex items-center justify-center text-3xl"
-                  style={{ background: 'var(--surface2)' }}>
+                  style={{ background: 'var(--card-2)' }}>
                   {e.course?.thumbnail_url ? (
                     <img src={e.course.thumbnail_url} alt="" className="w-full h-full object-cover rounded-lg" />
                   ) : '📚'}
                 </div>
-                <h3 className="font-semibold text-sm mb-2 line-clamp-2" style={{ color: 'var(--text)' }}>
+                <h3 className="font-semibold text-sm mb-2 line-clamp-2" style={{ color: 'var(--ink)' }}>
                   {e.course?.title}
                 </h3>
                 <div className="progress-bar mb-1">
                   <div className="progress-fill" style={{ width: `${e.progress_percent || 0}%` }} />
                 </div>
-                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{e.progress_percent || 0}% complété</p>
+                <p className="text-xs" style={{ color: 'var(--ink-mut)' }}>{e.progress_percent || 0}% complété</p>
               </Link>
             ))}
           </div>
@@ -90,17 +90,17 @@ export default async function DashboardPage() {
       {/* Discover */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold" style={{ color: 'var(--text)' }}>Découvrir</h2>
-          <Link href="/catalog" className="text-sm" style={{ color: 'var(--accent)' }}>Tout voir →</Link>
+          <h2 className="text-lg font-semibold" style={{ color: 'var(--ink)' }}>Découvrir</h2>
+          <Link href="/catalog" className="text-sm" style={{ color: 'var(--red)' }}>Tout voir →</Link>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {(courses || []).map((c: any) => (
-            <Link key={c.id} href={`/course/${c.id}`} className="card p-4 hover:border-[var(--accent)] transition-colors block">
+            <Link key={c.id} href={`/course/${c.id}`} className="card p-4 hover:border-[var(--red)] transition-colors block">
               <div className="w-full h-24 rounded-lg mb-3 flex items-center justify-center text-2xl"
-                style={{ background: 'var(--surface2)' }}>📖</div>
-              <h3 className="font-semibold text-sm line-clamp-2 mb-1" style={{ color: 'var(--text)' }}>{c.title}</h3>
-              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                {c.instructor?.full_name || 'Instructeur'} · <span className="badge badge-orange">{c.level}</span>
+                style={{ background: 'var(--card-2)' }}>📖</div>
+              <h3 className="font-semibold text-sm line-clamp-2 mb-1" style={{ color: 'var(--ink)' }}>{c.title}</h3>
+              <p className="text-xs" style={{ color: 'var(--ink-mut)' }}>
+                {c.instructor?.full_name || 'Instructeur'} · <span className="badge badge-red">{c.level}</span>
               </p>
             </Link>
           ))}
