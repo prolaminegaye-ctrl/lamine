@@ -78,7 +78,7 @@ export default function LessonPlayer({ lesson, userId, initialProgress }: Props)
     <div className="flex flex-1">
       {/* Content area */}
       <div className="flex-1 flex flex-col">
-        <div className="flex-1 p-4" style={{ background: 'var(--bg)' }}>
+        <div className="flex-1 p-4" style={{ background: 'var(--paper)' }}>
           {lesson.content_type === 'video' && lesson.content_url && (
             <div className="w-full max-w-4xl mx-auto">
               <div className="aspect-video bg-black rounded-xl overflow-hidden">
@@ -100,7 +100,7 @@ export default function LessonPlayer({ lesson, userId, initialProgress }: Props)
 
           {lesson.content_type === 'scorm' && lesson.content_url && (
             <div className="w-full max-w-4xl mx-auto">
-              <div className="rounded-xl overflow-hidden" style={{ border: '1px solid var(--border)' }}>
+              <div className="rounded-xl overflow-hidden" style={{ border: '1px solid var(--line)' }}>
                 <iframe ref={scormRef} src={lesson.content_url} className="w-full" style={{ height: '600px', border: 'none' }} />
               </div>
             </div>
@@ -114,7 +114,7 @@ export default function LessonPlayer({ lesson, userId, initialProgress }: Props)
 
           {(lesson.content_type === 'text' || !lesson.content_url) && lesson.content_body && (
             <div className="max-w-3xl mx-auto card p-8">
-              <div className="prose prose-invert max-w-none" style={{ color: 'var(--text)' }}
+              <div className="prose prose-invert max-w-none" style={{ color: 'var(--ink)' }}
                 dangerouslySetInnerHTML={{ __html: lesson.content_body }} />
             </div>
           )}
@@ -122,8 +122,8 @@ export default function LessonPlayer({ lesson, userId, initialProgress }: Props)
           {lesson.content_type === 'quiz' && (
             <div className="max-w-2xl mx-auto card p-8 text-center">
               <div className="text-4xl mb-4">❓</div>
-              <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--text)' }}>Quiz — {lesson.title}</h2>
-              <p style={{ color: 'var(--text-muted)' }}>Questionnaire interactif</p>
+              <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--ink)' }}>Quiz — {lesson.title}</h2>
+              <p style={{ color: 'var(--ink-mut)' }}>Questionnaire interactif</p>
               {lesson.content_body && (
                 <div className="mt-4 text-left" dangerouslySetInnerHTML={{ __html: lesson.content_body }} />
               )}
@@ -133,8 +133,8 @@ export default function LessonPlayer({ lesson, userId, initialProgress }: Props)
 
         {/* Mark complete bar */}
         <div className="px-6 py-4 flex items-center justify-between"
-          style={{ background: 'var(--surface)', borderTop: '1px solid var(--border)' }}>
-          <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
+          style={{ background: 'var(--card)', borderTop: '1px solid var(--line)' }}>
+          <span className="text-sm" style={{ color: 'var(--ink-mut)' }}>
             {lesson.duration_minutes ? `Durée estimée: ${lesson.duration_minutes} min` : ''}
           </span>
           <button onClick={toggleComplete}

@@ -57,22 +57,22 @@ export default function AdminPage() {
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6" style={{ color: 'var(--text)' }}>Administration</h1>
+      <h1 className="text-2xl font-bold mb-6" style={{ color: 'var(--ink)' }}>Administration</h1>
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         {[
-          { label: 'Cours publiés', value: stats.courses, icon: BookOpen, color: '#E8794A' },
-          { label: 'Utilisateurs', value: stats.users, icon: Users, color: '#3b82f6' },
-          { label: 'Inscriptions', value: stats.enrollments, icon: TrendingUp, color: '#22c55e' },
-        ].map(({ label, value, icon: Icon, color }) => (
+          { label: 'Cours publiés', value: stats.courses, icon: BookOpen, color: 'var(--red)', bg: 'var(--red-soft)' },
+          { label: 'Utilisateurs', value: stats.users, icon: Users, color: 'var(--sage)', bg: 'var(--sage-soft)' },
+          { label: 'Inscriptions', value: stats.enrollments, icon: TrendingUp, color: 'var(--green)', bg: 'var(--green-soft)' },
+        ].map(({ label, value, icon: Icon, color, bg }) => (
           <div key={label} className="card p-5 flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${color}20` }}>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: bg }}>
               <Icon size={20} style={{ color }} />
             </div>
             <div>
-              <div className="text-2xl font-bold" style={{ color: 'var(--text)' }}>{value}</div>
-              <div className="text-xs" style={{ color: 'var(--text-muted)' }}>{label}</div>
+              <div className="text-2xl font-bold" style={{ color: 'var(--ink)' }}>{value}</div>
+              <div className="text-xs" style={{ color: 'var(--ink-mut)' }}>{label}</div>
             </div>
           </div>
         ))}
@@ -90,8 +90,8 @@ export default function AdminPage() {
 
       {msg && (
         <div className="mb-4 p-3 rounded-lg text-sm"
-          style={{ background: msg.includes('!') ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)',
-            color: msg.includes('!') ? '#4ade80' : '#f87171' }}>
+          style={{ background: msg.includes('!') ? 'var(--green-soft)' : 'var(--red-soft)',
+            color: msg.includes('!') ? 'var(--green)' : 'var(--red-deep)' }}>
           {msg}
         </div>
       )}
@@ -101,24 +101,24 @@ export default function AdminPage() {
         <div className="card overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr style={{ borderBottom: '1px solid var(--border)', background: 'var(--surface2)' }}>
+              <tr style={{ borderBottom: '1px solid var(--line)', background: 'var(--card-2)' }}>
                 {['Titre', 'Niveau', 'Prix', 'Statut', 'Instructeur', 'Actions'].map(h => (
-                  <th key={h} className="text-left px-4 py-3" style={{ color: 'var(--text-muted)', fontWeight: 600 }}>{h}</th>
+                  <th key={h} className="text-left px-4 py-3" style={{ color: 'var(--ink-mut)', fontWeight: 600 }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {courses.map((c: any) => (
-                <tr key={c.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                  <td className="px-4 py-3 font-medium" style={{ color: 'var(--text)' }}>{c.title}</td>
-                  <td className="px-4 py-3"><span className="badge badge-orange">{levelLabel[c.level] || c.level}</span></td>
-                  <td className="px-4 py-3" style={{ color: c.price === 0 ? '#4ade80' : 'var(--accent)' }}>
+                <tr key={c.id} style={{ borderBottom: '1px solid var(--line)' }}>
+                  <td className="px-4 py-3 font-medium" style={{ color: 'var(--ink)' }}>{c.title}</td>
+                  <td className="px-4 py-3"><span className="badge badge-red">{levelLabel[c.level] || c.level}</span></td>
+                  <td className="px-4 py-3" style={{ color: c.price === 0 ? 'var(--green)' : 'var(--red)' }}>
                     {c.price === 0 ? 'Gratuit' : `${c.price} FCFA`}
                   </td>
                   <td className="px-4 py-3">
                     <span className={`badge ${c.status === 'published' ? 'badge-green' : 'badge-gray'}`}>{c.status}</span>
                   </td>
-                  <td className="px-4 py-3" style={{ color: 'var(--text-muted)' }}>{c.instructor?.full_name || '—'}</td>
+                  <td className="px-4 py-3" style={{ color: 'var(--ink-mut)' }}>{c.instructor?.full_name || '—'}</td>
                   <td className="px-4 py-3">
                     <button onClick={() => deleteCourse(c.id)} className="p-1.5 rounded hover:bg-red-500/20 text-red-400 transition-colors">
                       <Trash2 size={14} />
@@ -127,7 +127,7 @@ export default function AdminPage() {
                 </tr>
               ))}
               {courses.length === 0 && (
-                <tr><td colSpan={6} className="px-4 py-8 text-center" style={{ color: 'var(--text-muted)' }}>Aucun cours</td></tr>
+                <tr><td colSpan={6} className="px-4 py-8 text-center" style={{ color: 'var(--ink-mut)' }}>Aucun cours</td></tr>
               )}
             </tbody>
           </table>
@@ -139,19 +139,19 @@ export default function AdminPage() {
         <div className="card overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr style={{ borderBottom: '1px solid var(--border)', background: 'var(--surface2)' }}>
+              <tr style={{ borderBottom: '1px solid var(--line)', background: 'var(--card-2)' }}>
                 {['Nom', 'Email', 'Rôle', 'Inscrit le'].map(h => (
-                  <th key={h} className="text-left px-4 py-3" style={{ color: 'var(--text-muted)', fontWeight: 600 }}>{h}</th>
+                  <th key={h} className="text-left px-4 py-3" style={{ color: 'var(--ink-mut)', fontWeight: 600 }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {users.map((u: any) => (
-                <tr key={u.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                  <td className="px-4 py-3 font-medium" style={{ color: 'var(--text)' }}>{u.full_name || '—'}</td>
-                  <td className="px-4 py-3" style={{ color: 'var(--text-muted)' }}>{u.email}</td>
-                  <td className="px-4 py-3"><span className="badge badge-orange">{u.role}</span></td>
-                  <td className="px-4 py-3" style={{ color: 'var(--text-muted)' }}>
+                <tr key={u.id} style={{ borderBottom: '1px solid var(--line)' }}>
+                  <td className="px-4 py-3 font-medium" style={{ color: 'var(--ink)' }}>{u.full_name || '—'}</td>
+                  <td className="px-4 py-3" style={{ color: 'var(--ink-mut)' }}>{u.email}</td>
+                  <td className="px-4 py-3"><span className="badge badge-red">{u.role}</span></td>
+                  <td className="px-4 py-3" style={{ color: 'var(--ink-mut)' }}>
                     {new Date(u.created_at).toLocaleDateString('fr-FR')}
                   </td>
                 </tr>
@@ -164,21 +164,21 @@ export default function AdminPage() {
       {/* Add course form */}
       {tab === 'add' && (
         <div className="card p-6 max-w-xl">
-          <h2 className="text-lg font-semibold mb-5" style={{ color: 'var(--text)' }}>Créer un nouveau cours</h2>
+          <h2 className="text-lg font-semibold mb-5" style={{ color: 'var(--ink)' }}>Créer un nouveau cours</h2>
           <form onSubmit={addCourse} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-muted)' }}>Titre</label>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--ink-mut)' }}>Titre</label>
               <input className="input-field" required value={form.title}
                 onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Titre du cours" />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-muted)' }}>Description</label>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--ink-mut)' }}>Description</label>
               <textarea className="input-field" rows={3} value={form.description}
                 onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Description..." />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-muted)' }}>Niveau</label>
+                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--ink-mut)' }}>Niveau</label>
                 <select className="input-field" value={form.level} onChange={e => setForm(f => ({ ...f, level: e.target.value }))}>
                   <option value="beginner">Débutant</option>
                   <option value="intermediate">Intermédiaire</option>
@@ -186,13 +186,13 @@ export default function AdminPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-muted)' }}>Prix (FCFA)</label>
+                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--ink-mut)' }}>Prix (FCFA)</label>
                 <input className="input-field" type="number" min="0" value={form.price}
                   onChange={e => setForm(f => ({ ...f, price: e.target.value }))} />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-muted)' }}>Type de contenu</label>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--ink-mut)' }}>Type de contenu</label>
               <select className="input-field" value={form.content_type} onChange={e => setForm(f => ({ ...f, content_type: e.target.value }))}>
                 <option value="text">Texte</option>
                 <option value="video">Vidéo</option>

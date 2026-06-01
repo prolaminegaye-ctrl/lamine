@@ -32,16 +32,16 @@ export default async function LessonPage({ params }: { params: Promise<{ id: str
     .order('order_index')
 
   return (
-    <div className="flex flex-col min-h-screen" style={{ background: 'var(--bg)' }}>
+    <div className="flex flex-col min-h-screen" style={{ background: 'var(--paper)' }}>
       {/* Top bar */}
-      <div className="flex items-center gap-4 px-6 py-3" style={{ background: 'var(--surface)', borderBottom: '1px solid var(--border)' }}>
+      <div className="flex items-center gap-4 px-6 py-3" style={{ background: 'var(--card)', borderBottom: '1px solid var(--line)' }}>
         <Link href={`/course/${courseId}`} className="btn-ghost flex items-center gap-1 text-sm">
           <ChevronLeft size={16} /> {lesson.module?.courses?.title}
         </Link>
         <div className="flex-1 text-center">
-          <h1 className="font-semibold text-sm" style={{ color: 'var(--text)' }}>{lesson.title}</h1>
+          <h1 className="font-semibold text-sm" style={{ color: 'var(--ink)' }}>{lesson.title}</h1>
         </div>
-        <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
+        <div className="text-xs" style={{ color: 'var(--ink-mut)' }}>
           {lesson.content_type.toUpperCase()}
         </div>
       </div>

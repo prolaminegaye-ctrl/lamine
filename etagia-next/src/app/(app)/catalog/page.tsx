@@ -41,14 +41,14 @@ export default function CatalogPage() {
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-1" style={{ color: 'var(--text)' }}>Catalogue de cours</h1>
-        <p style={{ color: 'var(--text-muted)' }}>Explorez nos formations professionnelles</p>
+        <h1 className="text-2xl font-bold mb-1" style={{ color: 'var(--ink)' }}>Catalogue de cours</h1>
+        <p style={{ color: 'var(--ink-mut)' }}>Explorez nos formations professionnelles</p>
       </div>
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3 mb-6">
         <div className="relative flex-1 min-w-60">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--ink-mut)' }} />
           <input className="input-field pl-9" placeholder="Rechercher un cours..."
             value={search} onChange={e => setSearch(e.target.value)} />
         </div>
@@ -68,41 +68,41 @@ export default function CatalogPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {[...Array(8)].map((_, i) => (
             <div key={i} className="card p-4 animate-pulse">
-              <div className="w-full h-36 rounded-lg mb-3" style={{ background: 'var(--surface2)' }} />
-              <div className="h-4 rounded mb-2" style={{ background: 'var(--surface2)', width: '80%' }} />
-              <div className="h-3 rounded" style={{ background: 'var(--surface2)', width: '60%' }} />
+              <div className="w-full h-36 rounded-lg mb-3" style={{ background: 'var(--card-2)' }} />
+              <div className="h-4 rounded mb-2" style={{ background: 'var(--card-2)', width: '80%' }} />
+              <div className="h-3 rounded" style={{ background: 'var(--card-2)', width: '60%' }} />
             </div>
           ))}
         </div>
       ) : courses.length === 0 ? (
         <div className="text-center py-20">
-          <p className="text-lg" style={{ color: 'var(--text-muted)' }}>Aucun cours trouvé</p>
+          <p className="text-lg" style={{ color: 'var(--ink-mut)' }}>Aucun cours trouvé</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {courses.map((c: any) => (
             <Link key={c.id} href={`/course/${c.id}`}
-              className="card flex flex-col hover:border-[var(--accent)] transition-all hover:-translate-y-0.5">
+              className="card flex flex-col hover:border-[var(--red)] transition-all hover:-translate-y-0.5">
               <div className="w-full h-36 rounded-t-xl flex items-center justify-center text-3xl"
-                style={{ background: 'var(--surface2)' }}>
+                style={{ background: 'var(--card-2)' }}>
                 {c.thumbnail_url
                   ? <img src={c.thumbnail_url} alt={c.title} className="w-full h-full object-cover rounded-t-xl" />
                   : '📚'}
               </div>
               <div className="p-4 flex flex-col flex-1">
                 <div className="flex gap-2 mb-2">
-                  <span className="badge badge-orange">{levelLabel[c.level] || c.level}</span>
-                  {c.category && <span className="badge badge-blue">{c.category.name}</span>}
+                  <span className="badge badge-red">{levelLabel[c.level] || c.level}</span>
+                  {c.category && <span className="badge badge-sage">{c.category.name}</span>}
                 </div>
-                <h3 className="font-semibold text-sm mb-1 line-clamp-2 flex-1" style={{ color: 'var(--text)' }}>
+                <h3 className="font-semibold text-sm mb-1 line-clamp-2 flex-1" style={{ color: 'var(--ink)' }}>
                   {c.title}
                 </h3>
-                <p className="text-xs mb-3 line-clamp-2" style={{ color: 'var(--text-muted)' }}>
+                <p className="text-xs mb-3 line-clamp-2" style={{ color: 'var(--ink-mut)' }}>
                   {c.description}
                 </p>
-                <div className="flex items-center justify-between text-xs" style={{ color: 'var(--text-muted)' }}>
+                <div className="flex items-center justify-between text-xs" style={{ color: 'var(--ink-mut)' }}>
                   <span>{c.instructor?.full_name || 'Instructeur'}</span>
-                  <span className="font-semibold" style={{ color: c.price === 0 ? '#4ade80' : 'var(--accent)' }}>
+                  <span className="font-semibold" style={{ color: c.price === 0 ? 'var(--green)' : 'var(--red)' }}>
                     {c.price === 0 ? 'Gratuit' : `${c.price} FCFA`}
                   </span>
                 </div>
