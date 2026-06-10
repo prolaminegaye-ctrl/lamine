@@ -70,9 +70,8 @@ jobs:
               printf '%s' "$body" > "$OUT/$rel"
             fi
           done < /tmp/files.tsv
-          echo "Downloaded files:"
-          find "$OUT" -type f | head -50
-          find "$OUT" -type f | wc -l
+          echo "Downloaded $(find "$OUT" -type f | wc -l) files"
+          find "$OUT" -type f -printf '%p\n' | sort | awk 'NR<=80'
 
       - name: Export project settings (no secret values)
         env:
