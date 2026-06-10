@@ -36,34 +36,24 @@ jobs:
           curl -sf -H "$AUTH" "https://api.vercel.com/v6/deployments/$DPL/files?teamId=$TEAM" > /tmp/tree.json
           echo "Tree downloaded ($(wc -c < /tmp/tree.json) bytes)"
 
-          # Walk the tree recursively -> lines of "<uid>\t<path>"
+          # Walk the tree recursively. Each node: {name, type, uid?, children?}.
+          # walk() takes the parent prefix and operates on a single node.
           jq -r '
-            def walk_tree(prefix):
-              .[] |
+            def walk(prefix):
+              (prefix + .name) as $p |
               if .type == "directory" then
-                (.children // []) | walk_tree(prefix + .name + "/")
-              elif .type == "file" then
-                "\(.uid)\t\(prefix + .name)"
+                (.children // [])[] | walk($p + "/")
               else
-                empty
+                "\(.uid)\t\($p)"
               end;
-            walk_tree("")
-          ' /tmp/tree.json > /tmp/files.tsv || {
-            # fallback: tree may be a single root object
-            jq -r '
-              def walk2(prefix):
-                if .type == "directory" then
-                  (.children // [])[] | walk2(prefix + .name + "/")
-                elif .type == "file" then
-                  "\(.uid)\t\(prefix + .name)"
-                else empty end;
-              if type == "array" then .[] | walk2("") else walk2("") end
-            ' /tmp/tree.json > /tmp/files.tsv
-          }
+            .[] | walk("")
+          ' /tmp/tree.json > /tmp/files.tsv
 
           N=$(wc -l < /tmp/files.tsv)
           echo "Found $N files"
-          head -20 /tmp/files.tsv | cut -f2
+          echo "===== FULL FILE LIST ====="
+          cut -f2 /tmp/files.tsv
+          echo "=========================="
 
           while IFS=$'\t' read -r uid path; do
             # strip leading "src/" segment Vercel sometimes adds
