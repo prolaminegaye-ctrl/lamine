@@ -1,0 +1,70 @@
+name: Deploy GolleO to Vercel (production)
+
+on:
+  push:
+    branches: [claude/relaxed-bohr-5csbuf]
+    paths: ['.golleo-deploy-request']
+
+env:
+  PROJECT_ID: prj_iZja6BQ3UrMIeacqpmwiBDt7RhoO
+  TEAM_ID: team_pjZ6wWWlhkZm8cUYllxIehT9
+  SUPABASE_URL: https://taimtpltpaxugfcmwsux.supabase.co
+  SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRhaW10cGx0cGF4dWdmY213c3V4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwODg2NjQsImV4cCI6MjA5MzY2NDY2NH0.CxGX4CetHYhb-FqN6LWZlm0VS4PevUdc6p9IGPQe-Ow
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: golleo-smart-hire-src
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Fix Vercel project build settings
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          set -euo pipefail
+          TOKEN=$(echo -n "$VERCEL_TOKEN" | tr -d '\t\n\r ')
+          curl -sf -X PATCH \
+            "https://api.vercel.com/v9/projects/$PROJECT_ID?teamId=$TEAM_ID" \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "framework": "vite",
+              "rootDirectory": null,
+              "installCommand": null,
+              "buildCommand": "npm run build",
+              "outputDirectory": "dist"
+            }' | sed 's/.*/[settings updated]/' | head -1
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Link project
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          set -euo pipefail
+          TOKEN=$(echo -n "$VERCEL_TOKEN" | tr -d '\t\n\r ')
+          mkdir -p .vercel
+          printf '{"projectId":"%s","orgId":"%s"}' "$PROJECT_ID" "$TEAM_ID" > .vercel/project.json
+
+      - name: Deploy to production
+        id: deploy
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          set -euo pipefail
+          TOKEN=$(echo -n "$VERCEL_TOKEN" | tr -d '\t\n\r ')
+          URL=$(vercel deploy --prod --yes \
+            --token="$TOKEN" \
+            --build-env VITE_SUPABASE_URL="$SUPABASE_URL" \
+            --build-env VITE_SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY" \
+            2>&1 | tee /tmp/deploy.log | grep -oE 'https://[^ ]+\.vercel\.app' | tail -1)
+          echo "Deployed: $URL"
+          tail -30 /tmp/deploy.log

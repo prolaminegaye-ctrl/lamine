@@ -21,7 +21,9 @@ export type TestFlowState =
 
 // ── Appel Claude via l'API locale ─────────────────────────────────────────────
 
-const API_BASE = "http://localhost:3000";
+// Base relative : les fonctions serverless /api/* sont servies sur la même
+// origine que l'app (Vercel). En local, le proxy Vite redirige /api.
+const API_BASE = (import.meta.env.BASE_URL ?? "/").replace(/\/$/, "");
 
 async function fetchClaudeAnalysis(
   testType: TestType,
