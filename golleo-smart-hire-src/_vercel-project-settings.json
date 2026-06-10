@@ -1,0 +1,10 @@
+{
+  "name": "golleo-smart-hire",
+  "framework": null,
+  "rootDirectory": null,
+  "installCommand": "cd golleo-api && npm install",
+  "buildCommand": "cd golleo-api && npm install && cd ../artifacts/emploi-ai && npm install && npm run build",
+  "outputDirectory": "artifacts/emploi-ai/dist",
+  "devCommand": null,
+  "nodeVersion": "24.x"
+}

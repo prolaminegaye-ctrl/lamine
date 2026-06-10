@@ -1,0 +1,12 @@
+{
+  "envNames": [
+    {
+      "key": "ANTHROPIC_API_KEY",
+      "target": [
+        "preview",
+        "production"
+      ],
+      "type": "sensitive"
+    }
+  ]
+}
