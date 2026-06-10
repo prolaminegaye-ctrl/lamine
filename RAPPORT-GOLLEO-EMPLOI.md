@@ -1,6 +1,23 @@
-# Diagnostic & plan de remédiation — golleo-emploi.com
+# Diagnostic & remédiation — golleo-emploi.com
 
-*Établi le 10 juin 2026. Périmètre analysé : production Vercel, DNS, Supabase, bundle JS de production (1,35 Mo lu intégralement).*
+*Établi le 10 juin 2026. Périmètre : production Vercel, DNS, Supabase, code source.*
+
+---
+
+## ✅ RÉSOLU (10/06/2026) — le site est de nouveau opérationnel
+
+Le code source (récupéré depuis l'archive de déploiement Vercel) a été **réhabilité en application autonome déployable** et **redéployé en production**. Vérifié en ligne :
+
+- **Frontend** : nouveau build chargé, découpé en chunks (bundle principal 1,35 Mo → 171 Ko gzip).
+- **Routing SPA** : les routes profondes (`/emploi/tests/afri-code`…) s'affichent.
+- **Backend** : 8 fonctions serverless `/api/*` déployées et propulsées par Claude (`claude-opus-4-8`) — `/api/dashboard/emploi` renvoie bien du JSON.
+- **Sécurité** : en-têtes CSP, HSTS, X-Frame-Options DENY, X-Content-Type-Options, Referrer-Policy, Permissions-Policy actifs + durcissement Supabase (fonctions `SECURITY DEFINER`).
+
+**Corrections clés** : suppression des dépendances monorepo Replit (`catalog:` / `workspace:*`) qui cassaient l'installation ; `vite.config` autonome (plus de `PORT`/`BASE_PATH` obligatoires) ; shim de `@workspace/api-client-react` pour que les pages recruteur compilent ; correction du `http://localhost:3000` codé en dur ; backend IA réécrit en fonctions Vercel ; pipeline de déploiement réparé (réglages projet Vercel + déploiement CLI via `VERCEL_TOKEN`).
+
+Le diagnostic d'origine est conservé ci-dessous pour mémoire.
+
+---
 
 ---
 
