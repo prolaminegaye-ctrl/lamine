@@ -1,16 +1,13 @@
 name: Fetch GolleO source from Vercel deployment
 
 on:
-  workflow_dispatch:
-    inputs:
-      deployment_id:
-        description: "Vercel deployment ID to fetch source from"
-        required: true
-        default: "dpl_2omFemUPatcYxG9DveZPgHc9kijT"
-      team_id:
-        description: "Vercel team ID"
-        required: true
-        default: "team_pjZ6wWWlhkZm8cUYllxIehT9"
+  push:
+    branches: [claude/relaxed-bohr-5csbuf]
+    paths: ['.golleo-fetch-request']
+
+env:
+  DEPLOYMENT_ID: dpl_2omFemUPatcYxG9DveZPgHc9kijT
+  TEAM_ID: team_pjZ6wWWlhkZm8cUYllxIehT9
 
 permissions:
   contents: write
@@ -26,8 +23,8 @@ jobs:
       - name: Download deployment source files
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          DPL: ${{ inputs.deployment_id }}
-          TEAM: ${{ inputs.team_id }}
+          DPL: ${{ env.DEPLOYMENT_ID }}
+          TEAM: ${{ env.TEAM_ID }}
         run: |
           set -euo pipefail
           TOKEN=$(echo -n "$VERCEL_TOKEN" | tr -d '\t\n\r ')
@@ -90,7 +87,7 @@ jobs:
       - name: Export project settings (no secret values)
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          TEAM: ${{ inputs.team_id }}
+          TEAM: ${{ env.TEAM_ID }}
         run: |
           set -euo pipefail
           TOKEN=$(echo -n "$VERCEL_TOKEN" | tr -d '\t\n\r ')
