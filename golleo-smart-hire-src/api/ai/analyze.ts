@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { askClaudeJSON, readJsonBody } from "../_lib/claude";
+import { askClaudeJSON, readJsonBody } from "../_lib/claude.js";
 
 // POST /api/ai/analyze — analyse IA d'un test (AFRI-CODE, ikigai, personnalité…)
 // Body: { testType, scores, profileType? }

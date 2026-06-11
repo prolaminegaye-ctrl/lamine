@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { askClaudeJSON, readJsonBody } from "../_lib/claude";
+import { askClaudeJSON, readJsonBody } from "../_lib/claude.js";
 
 // POST /api/recruiter/job-matches — matching IA entre une offre et une liste de candidats.
 // Body: { job, candidates: [...] } → { matches: [{candidateName, matchScore, reasons[]}] }

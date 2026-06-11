@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { askClaudeText, readJsonBody } from "../_lib/claude";
+import { askClaudeText, readJsonBody } from "../_lib/claude.js";
 
 // POST /api/recruiter/document — génère un document RH (CV optimisé, lettre, synthèse…)
 export default async function handler(req: VercelRequest, res: VercelResponse) {

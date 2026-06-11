@@ -3,7 +3,7 @@ import Busboy from "busboy";
 // Import direct du parseur (évite le harness de debug de l'index pdf-parse).
 import pdfParse from "pdf-parse/lib/pdf-parse.js";
 import mammoth from "mammoth";
-import { askClaudeJSON } from "../_lib/claude";
+import { askClaudeJSON } from "../_lib/claude.js";
 
 // On désactive le body-parser de Vercel pour lire le flux multipart brut.
 export const config = { api: { bodyParser: false } };

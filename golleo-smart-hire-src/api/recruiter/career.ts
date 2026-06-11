@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { askClaudeJSON, readJsonBody } from "../_lib/claude";
+import { askClaudeJSON, readJsonBody } from "../_lib/claude.js";
 
 // POST /api/recruiter/career — recommandations de parcours / orientation.
 export default async function handler(req: VercelRequest, res: VercelResponse) {

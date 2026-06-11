@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { askClaudeJSON, readJsonBody } from "../_lib/claude";
+import { askClaudeJSON, readJsonBody } from "../_lib/claude.js";
 
 // POST /api/recruiter/softskills — évaluation des soft skills à partir d'un échantillon écrit.
 export default async function handler(req: VercelRequest, res: VercelResponse) {

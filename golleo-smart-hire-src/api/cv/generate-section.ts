@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { askClaudeText, readJsonBody } from "../_lib/claude";
+import { askClaudeText, readJsonBody } from "../_lib/claude.js";
 
 // POST /api/cv/generate-section — génère une section de CV par IA.
 // Body: { section, jobTitle, experience, skills, languages, region, currentContent }
