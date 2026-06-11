@@ -19,6 +19,18 @@ Le diagnostic d'origine est conservé ci-dessous pour mémoire.
 
 ---
 
+## ✅ V2 (11/06/2026) — espace recruteur réel, parsing CV, accueil premium
+
+- **Espace recruteur branché sur Supabase** : tables dédiées `golleo_candidates`, `golleo_jobs`, `golleo_documents`, `golleo_softskills`, `golleo_recruiter_activities` avec **RLS par conseiller** (chaque conseiller connecté ne voit que ses données ; vérifié : zéro alerte advisor). Fonctionnels : candidats (CRUD + recherche/filtres), offres (CRUD + **matching IA offre↔candidats**), tableau de bord (statistiques réelles + activité), documents IA (génération + historique), soft-skills (évaluation IA + historique), recommandations de carrière. Entretiens IA et conseillers : stubs gracieux (« bientôt disponible »).
+- **Parsing CV serveur réel** : `/api/cv/upload-analyze` extrait le texte des **PDF (pdf-parse)** et **DOCX (mammoth)** (limite 10 Mo) puis fait analyser par Claude (scores ATS/présentation/pertinence/impact + recommandations). Repli gracieux si fichier illisible.
+- **Page d'accueil premium** : hiérarchie éditoriale renforcée, micro-animations framer-motion (avec respect de `prefers-reduced-motion`), focus visibles (WCAG), footer enrichi — routes inchangées.
+- **4 nouvelles fonctions** `/api/recruiter/*` (career, document, softskills, job-matches) propulsées par Claude — 12 lambdas en production.
+- **Correctif** : extensions `.js` requises sur les imports relatifs ESM des fonctions (cause d'un `ERR_MODULE_NOT_FOUND` → `FUNCTION_INVOCATION_FAILED`). Vérifié en prod après redéploiement : fonctions OK, zéro erreur runtime.
+
+*Note : l'espace recruteur nécessite un utilisateur connecté (Supabase Auth) pour lire/écrire — RLS oblige. Sans connexion, le tableau de bord affiche les données de démonstration.*
+
+---
+
 ---
 
 ## 1. Diagnostic — pourquoi le site « ne fonctionne pas »
