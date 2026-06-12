@@ -29,8 +29,8 @@ export default function DashboardPage() {
 
       const [{ data: profile }, { data: enrolled }, { data: courses }] = await Promise.all([
         sb.from('profiles').select('full_name').eq('id', user.id).single(),
-        sb.from('enrollments').select('*, course:courses(id,title,duration_minutes)').eq('user_id', user.id).limit(6),
-        sb.from('courses').select('id,title,category:categories(name)').eq('status', 'published').limit(4),
+        sb.from('enrollments').select('*, course:courses(id,title,category,duration_hours)').eq('user_id', user.id).limit(6),
+        sb.from('courses').select('id,title,category').eq('status', 'published').limit(4),
       ])
 
       setUserName(profile?.full_name || user.email?.split('@')[0] || 'Apprenant')
@@ -118,7 +118,7 @@ export default function DashboardPage() {
               const progress = e.progress_percent ?? e.progress ?? 0
               const lessons = e.lessons || 0
               const completed = e.completed || 0
-              const category = e.course?.category?.name || e.category || ''
+              const category = e.course?.category || e.category || ''
               const courseId = e.course?.id || e.id
 
               return (

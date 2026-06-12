@@ -1,0 +1,357 @@
+From 14135be3bb04ed72f5a0fdcb5326a595efe9e539 Mon Sep 17 00:00:00 2001
+From: prolaminegaye-ctrl <prolaminegaye@gmail.com>
+Date: Fri, 12 Jun 2026 18:01:03 +0000
+Subject: [PATCH] security: suppression bypass admin + protection serveur des
+ routes et API
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- Suppression de l'auto-login propriétaire sans mot de passe (localStorage + email)
+- Sessions Supabase en cookies (@supabase/ssr) vérifiables côté serveur
+- Middleware : /admin réservé au rôle admin, /formateur aux formateurs/admins,
+  pages privées redirigées vers la connexion, API IA et BBB en 401 sans session
+- Rôle lu depuis public.profiles (jamais depuis user_metadata modifiable client)
+- Inscription : profil créé par le trigger handle_new_user (l'upsert utilisait
+  des colonnes inexistantes nom/prenom/statut/email)
+- Onboarding : réponses stockées dans profiles.learning_profile (jsonb)
+---
+ app/auth/page.tsx       | 32 +++++++++++-----------
+ app/onboarding/page.tsx | 17 ++++++------
+ app/page.tsx            | 60 +++++++++++++----------------------------
+ lib/supabase/client.ts  | 11 ++++++++
+ lib/supabase/server.ts  | 18 +++++++++++++
+ middleware.ts           | 58 ++++++++++++++++++++++++++++++++++++---
+ 6 files changed, 127 insertions(+), 69 deletions(-)
+ create mode 100644 lib/supabase/client.ts
+ create mode 100644 lib/supabase/server.ts
+
+diff --git a/app/auth/page.tsx b/app/auth/page.tsx
+index 771f095..090e617 100644
+--- a/app/auth/page.tsx
++++ b/app/auth/page.tsx
+@@ -2,14 +2,11 @@
+ export const dynamic = 'force-dynamic'
+ 
+ import { useState } from 'react'
+-import { createClient } from '@supabase/supabase-js'
++import { createClient } from '@/lib/supabase/client'
+ import { useRouter } from 'next/navigation'
+ 
+ function getSupabase() {
+-  return createClient(
+-    process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
+-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ''
+-  )
++  return createClient()
+ }
+ 
+ type Statut = 'apprenant' | 'formateur' | 'consultant' | 'autre'
+@@ -52,13 +49,13 @@ export default function AuthPage() {
+     })
+     if (err) { setError(err.message); setLoading(false); return }
+     if (data.user) {
+-      await getSupabase().from('profiles').upsert({
+-        id: data.user.id,
+-        nom, prenom, statut, email,
+-        created_at: new Date().toISOString()
+-      })
+-      setSuccess('Compte créé ! Vérifiez votre email pour confirmer votre inscription.')
+-      setTimeout(() => router.push('/onboarding'), 1800)
++      // Le profil est créé par le trigger handle_new_user (full_name depuis les métadonnées)
++      if (data.session) {
++        setSuccess('Compte créé ! Bienvenue sur ETAGIA.')
++        setTimeout(() => router.push('/onboarding'), 1200)
++      } else {
++        setSuccess('Compte créé ! Vérifiez votre email pour confirmer votre inscription.')
++      }
+     }
+     setLoading(false)
+   }
+@@ -71,12 +68,13 @@ export default function AuthPage() {
+     })
+     if (err) { setError(err.message); setLoading(false); return }
+     if (data.user) {
+-      const meta = data.user.user_metadata
+-      const role = meta?.statut || 'apprenant'
+-      const onb  = meta?.onboarding_done
++      const sb = getSupabase()
++      const { data: profile } = await sb.from('profiles').select('role, learning_profile').eq('id', data.user.id).single()
++      const role = profile?.role ?? 'learner'
++      const onb = (profile?.learning_profile as { onboarding_done?: boolean } | null)?.onboarding_done
+       if (!onb) router.push('/onboarding')
+-      else if (role === 'admin')    router.push('/admin')
+-      else if (role === 'formateur') router.push('/formateur')
++      else if (role === 'admin') router.push('/admin')
++      else if (role === 'formateur' || role === 'teacher') router.push('/formateur')
+       else router.push('/dashboard')
+     }
+     setLoading(false)
+diff --git a/app/onboarding/page.tsx b/app/onboarding/page.tsx
+index a4b348c..1836518 100644
+--- a/app/onboarding/page.tsx
++++ b/app/onboarding/page.tsx
+@@ -2,14 +2,11 @@
+ export const dynamic = 'force-dynamic'
+ 
+ import { useState } from 'react'
+-import { createClient } from '@supabase/supabase-js'
++import { createClient } from '@/lib/supabase/client'
+ import { useRouter } from 'next/navigation'
+ 
+ function getSupabase() {
+-  return createClient(
+-    process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
+-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ''
+-  )
++  return createClient()
+ }
+ 
+ interface Step {
+@@ -112,10 +109,14 @@ export default function OnboardingPage() {
+   async function finalize() {
+     setLoading(true)
+     try {
+-      const { data: { user } } = await getSupabase().auth.getUser()
++      const sb = getSupabase()
++      const { data: { user } } = await sb.auth.getUser()
+       if (user) {
+-        await getSupabase().auth.updateUser({ data: { ...answers, onboarding_done: true } })
+-        await getSupabase().from('profiles').update({ ...answers, onboarding_done: true }).eq('id', user.id)
++        // Les réponses sont stockées dans la colonne jsonb learning_profile
++        // (les colonnes individuelles n'existent pas dans la table profiles)
++        await sb.from('profiles')
++          .update({ learning_profile: { ...answers, onboarding_done: true } })
++          .eq('id', user.id)
+       }
+     } catch {}
+     setLoading(false)
+diff --git a/app/page.tsx b/app/page.tsx
+index 1adb659..f2f94b3 100644
+--- a/app/page.tsx
++++ b/app/page.tsx
+@@ -1,18 +1,15 @@
+ 'use client'
+ import { useState, useEffect } from 'react'
+ import { useRouter } from 'next/navigation'
+-import { createClient } from '@supabase/supabase-js'
++import { createClient } from '@/lib/supabase/client'
+ 
+-function getSupabase() {
+-  return createClient(
+-    process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
+-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ''
+-  )
++// Redirection selon le rôle stocké en base (jamais selon des données client)
++function homeForRole(role?: string | null) {
++  if (role === 'admin') return '/admin'
++  if (role === 'formateur' || role === 'teacher') return '/formateur'
++  return '/dashboard'
+ }
+ 
+-// Clé stockée dans localStorage pour reconnaître le navigateur du propriétaire
+-const OWNER_KEY = 'etagia_owner_device'
+-
+ const ROLES = [
+   { id: 'apprenant',  label: 'Apprenant',   icon: '🎓', desc: 'Je veux apprendre' },
+   { id: 'formateur',  label: 'Formateur',   icon: '🧑‍🏫', desc: 'Je crée des formations' },
+@@ -44,23 +41,14 @@ export default function LoginPage() {
+   const [ready, setReady]       = useState(false)
+ 
+   useEffect(() => {
+-    // ── Vérifier si ce navigateur est reconnu comme propriétaire ──
+-    if (typeof window !== 'undefined') {
+-      if (localStorage.getItem(OWNER_KEY) === '1') {
+-        router.replace('/admin')
+-        return
+-      }
+-    }
+-
+     // ── Vérifier session Supabase active ──
+     ;(async () => {
+       try {
+-        const { data } = await getSupabase().auth.getSession()
+-        if (data.session?.user) {
+-          const meta = data.session.user.user_metadata
+-          const r = meta?.statut || 'apprenant'
+-          if (r === 'admin' || r === 'formateur') router.replace('/formateur')
+-          else router.replace('/dashboard')
++        const sb = createClient()
++        const { data: { user } } = await sb.auth.getUser()
++        if (user) {
++          const { data: profile } = await sb.from('profiles').select('role').eq('id', user.id).single()
++          router.replace(homeForRole(profile?.role))
+           return
+         }
+       } catch (_) {}
+@@ -73,24 +61,14 @@ export default function LoginPage() {
+     setLoading(true); setError('')
+ 
+     try {
+-      // ── Connexion directe propriétaire (email suffit, pas de mdp) ──
+-      if (email.trim().toLowerCase() === 'prolaminegaye@gmail.com') {
+-        localStorage.setItem(OWNER_KEY, '1')
+-        router.replace('/admin')
+-        return
+-      }
+-
+-      const sb = getSupabase()
++      const sb = createClient()
+ 
+       if (mode === 'login') {
+         const { data, error: err } = await sb.auth.signInWithPassword({ email, password })
+         if (err) { setError(err.message); setLoading(false); return }
+         if (data.user) {
+-          const meta = data.user.user_metadata
+-          const r = meta?.statut || 'apprenant'
+-          if (r === 'admin') router.replace('/admin')
+-          else if (r === 'formateur') router.replace('/formateur')
+-          else router.replace('/dashboard')
++          const { data: profile } = await sb.from('profiles').select('role').eq('id', data.user.id).single()
++          router.replace(homeForRole(profile?.role))
+         }
+       } else {
+         const [prenom, ...rest] = name.trim().split(' ')
+@@ -100,12 +78,12 @@ export default function LoginPage() {
+           options: { data: { nom, prenom, statut: role, full_name: name } },
+         })
+         if (err) { setError(err.message); setLoading(false); return }
+-        if (data.user) {
+-          await sb.from('profiles').upsert({
+-            id: data.user.id, nom, prenom, statut: role, email,
+-            created_at: new Date().toISOString(),
+-          })
++        if (data.session) {
++          // Le profil est créé automatiquement par le trigger handle_new_user
+           router.replace('/onboarding')
++        } else {
++          // Confirmation email exigée par Supabase
++          setError('Compte créé — vérifiez votre email pour activer votre compte.')
+         }
+       }
+     } catch (_) {
+diff --git a/lib/supabase/client.ts b/lib/supabase/client.ts
+new file mode 100644
+index 0000000..bf6e4b7
+--- /dev/null
++++ b/lib/supabase/client.ts
+@@ -0,0 +1,11 @@
++'use client'
++import { createBrowserClient } from '@supabase/ssr'
++
++// Client navigateur : la session est stockée en cookies (et non en localStorage),
++// ce qui permet au middleware et aux routes API de vérifier l'authentification.
++export function createClient() {
++  return createBrowserClient(
++    process.env.NEXT_PUBLIC_SUPABASE_URL!,
++    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
++  )
++}
+diff --git a/lib/supabase/server.ts b/lib/supabase/server.ts
+new file mode 100644
+index 0000000..64ffae1
+--- /dev/null
++++ b/lib/supabase/server.ts
+@@ -0,0 +1,18 @@
++import { createServerClient } from '@supabase/ssr'
++import { cookies } from 'next/headers'
++
++export async function createClient() {
++  const cookieStore = await cookies()
++  return createServerClient(
++    process.env.NEXT_PUBLIC_SUPABASE_URL!,
++    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
++    {
++      cookies: {
++        getAll() { return cookieStore.getAll() },
++        setAll(toSet) {
++          try { toSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options)) } catch {}
++        },
++      },
++    }
++  )
++}
+diff --git a/middleware.ts b/middleware.ts
+index bc0e4f8..126a4e0 100644
+--- a/middleware.ts
++++ b/middleware.ts
+@@ -1,7 +1,19 @@
+ import { NextResponse } from 'next/server'
+ import type { NextRequest } from 'next/server'
++import { createServerClient } from '@supabase/ssr'
+ 
+-export function middleware(request: NextRequest) {
++// Routes accessibles sans authentification
++const PUBLIC_PATHS = ['/', '/landing', '/guide']
++const PUBLIC_PREFIXES = ['/auth', '/api/lti', '/modules']
++
++// Routes API nécessitant une session (protègent les crédits IA et BBB)
++const PROTECTED_API = ['/api/ai-tutor', '/api/generate-course', '/api/market-chat', '/api/bbb']
++
++function isPublic(pathname: string) {
++  return PUBLIC_PATHS.includes(pathname) || PUBLIC_PREFIXES.some(p => pathname.startsWith(p))
++}
++
++export async function middleware(request: NextRequest) {
+   const { pathname } = request.nextUrl
+ 
+   // ── Bloquer /api/check-env en production sans token admin ──────────────────
+@@ -14,7 +26,47 @@ export function middleware(request: NextRequest) {
+     }
+   }
+ 
+-  const response = NextResponse.next()
++  let response = NextResponse.next({ request })
++
++  const supabase = createServerClient(
++    process.env.NEXT_PUBLIC_SUPABASE_URL!,
++    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
++    {
++      cookies: {
++        getAll() { return request.cookies.getAll() },
++        setAll(toSet) {
++          toSet.forEach(({ name, value }) => request.cookies.set(name, value))
++          response = NextResponse.next({ request })
++          toSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options))
++        },
++      },
++    }
++  )
++
++  const { data: { user } } = await supabase.auth.getUser()
++
++  // ── Routes API protégées : 401 JSON plutôt qu'une redirection ──────────────
++  if (PROTECTED_API.some(p => pathname.startsWith(p))) {
++    if (!user) {
++      return NextResponse.json({ error: 'Authentification requise' }, { status: 401 })
++    }
++  } else if (!user && !isPublic(pathname) && !pathname.startsWith('/api/')) {
++    // ── Pages protégées : redirection vers la page de connexion ──────────────
++    return NextResponse.redirect(new URL('/', request.url))
++  }
++
++  // ── Espaces réservés par rôle (rôle lu en base, jamais depuis le client) ───
++  if (user && (pathname.startsWith('/admin') || pathname.startsWith('/formateur'))) {
++    const { data: profile } = await supabase
++      .from('profiles').select('role').eq('id', user.id).single()
++    const role = profile?.role ?? 'learner'
++    const allowed = pathname.startsWith('/admin')
++      ? role === 'admin'
++      : role === 'admin' || role === 'formateur' || role === 'teacher'
++    if (!allowed) {
++      return NextResponse.redirect(new URL('/dashboard', request.url))
++    }
++  }
+ 
+   // ── Security headers sur toutes les réponses ───────────────────────────────
+   response.headers.set('X-Content-Type-Options', 'nosniff')
+@@ -26,5 +78,5 @@ export function middleware(request: NextRequest) {
+ }
+ 
+ export const config = {
+-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
++  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.svg|.*\\.png|.*\\.pdf|.*\\.html).*)'],
+ }
+-- 
+2.43.0
+

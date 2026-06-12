@@ -24,11 +24,19 @@ export async function proxy(request: NextRequest) {
 
   const isPublic = pathname === '/' || pathname.startsWith('/auth/')
   if (!user && !isPublic) {
+    // Les API renvoient 401 plutôt qu'une redirection HTML
+    if (pathname.startsWith('/api/')) {
+      return NextResponse.json({ error: 'Authentification requise' }, { status: 401 })
+    }
     return NextResponse.redirect(new URL('/', request.url))
   }
   if (user && pathname === '/') {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
+
+  response.headers.set('X-Content-Type-Options', 'nosniff')
+  response.headers.set('X-Frame-Options', 'SAMEORIGIN')
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
 
   return response
 }
