@@ -1,0 +1,271 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* CampusForma REAL Logo Color: #72b249 */
+    --cf-green: #72b249;
+    --cf-green-hover: #5d963a;
+    --cf-green-light: #eef6e8;
+    --cf-green-very-light: #e4f0db;
+    --cf-green-pastel: rgba(114, 178, 73, 0.12);
+    --cf-green-pastel-dark: rgba(114, 178, 73, 0.2);
+    --cf-green-dark: #4a7a30;
+    --cf-blue-light: #F3F5F8;
+    --cf-yellow: #FFC300;
+    --cf-black: #000000;
+    --cf-gray-dark: #2D2D2D;
+    --cf-gray-medium: #555555;
+    --cf-gray: #7A7A7A;
+    --cf-gray-light: #9A9A9A;
+    --cf-border: #D8D8D8;
+    --cf-border-light: #E4E4E4;
+    --cf-border-very-light: #EEEEEE;
+    --cf-bg: #F7F7F7;
+    --cf-white: #FFFFFF;
+    --cf-rose: #FF6B6B;
+    --cf-cyan: #00BCD4;
+    --cf-violet: #7B61FF;
+    --cf-blue: #2196F3;
+    --cf-success: #4CAF50;
+    --cf-error: #F44336;
+    --cf-orange: #E8A732;
+
+    /* Glass effects */
+    --cf-glass-bg: rgba(255, 255, 255, 0.15);
+    --cf-glass-border: rgba(255, 255, 255, 0.3);
+    --cf-overlay-transparent: rgba(255, 255, 255, 0.95);
+
+    /* shadcn variables */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+    --primary: 100 42% 49%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 96.5%;
+    --secondary-foreground: 0 0% 0%;
+    --muted: 0 0% 96.5%;
+    --muted-foreground: 0 0% 48%;
+    --accent: 0 0% 96.5%;
+    --accent-foreground: 0 0% 0%;
+    --destructive: 4 90% 58%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 85%;
+    --input: 0 0% 85%;
+    --ring: 100 42% 49%;
+    --radius: 0.5rem;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--cf-white);
+    color: var(--cf-gray-medium);
+    line-height: 1.65;
+    font-size: 15px;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    color: var(--cf-black);
+    line-height: 1.25;
+  }
+
+  code, .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+@layer components {
+  .container-cf {
+    max-width: 1240px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .btn-primary {
+    background-color: var(--cf-green);
+    color: white;
+    border-radius: 10px;
+    padding: 14px 28px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    box-shadow: 0 2px 8px rgba(114, 178, 73, 0.2);
+  }
+
+  .btn-primary:hover {
+    background-color: var(--cf-green-hover);
+    box-shadow: 0 8px 24px rgba(114, 178, 73, 0.35);
+    transform: translateY(-2px);
+  }
+
+  .btn-primary:active {
+    transform: translateY(0);
+  }
+
+  .btn-secondary {
+    background-color: white;
+    color: var(--cf-black);
+    border: 1.5px solid var(--cf-border);
+    border-radius: 10px;
+    padding: 14px 28px;
+    font-size: 15px;
+    font-weight: 500;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--cf-green);
+    color: var(--cf-green);
+    box-shadow: 0 4px 16px rgba(114, 178, 73, 0.1);
+  }
+
+  .btn-outline {
+    background-color: transparent;
+    color: var(--cf-green);
+    border: 1.5px solid var(--cf-green);
+    border-radius: 10px;
+    padding: 14px 28px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .btn-outline:hover {
+    background-color: var(--cf-green);
+    color: white;
+    box-shadow: 0 8px 24px rgba(114, 178, 73, 0.3);
+    transform: translateY(-2px);
+  }
+
+  .section-padding {
+    padding-top: 100px;
+    padding-bottom: 100px;
+  }
+
+  .section-title {
+    font-size: clamp(28px, 4vw, 42px);
+    font-weight: 700;
+    color: var(--cf-black);
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+  }
+
+  .section-subtitle {
+    font-size: 16px;
+    color: var(--cf-gray);
+    line-height: 1.6;
+    margin-top: 12px;
+  }
+
+  .tag-level {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 100px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .tag-level-debutant {
+    background-color: var(--cf-green-light);
+    color: var(--cf-green);
+  }
+
+  .tag-level-intermediaire {
+    background-color: #FFF3E0;
+    color: #FF8F00;
+  }
+
+  .tag-level-avance {
+    background-color: #FCE4EC;
+    color: #C2185B;
+  }
+
+  .tag-level-tous {
+    background-color: #F5F5F5;
+    color: #616161;
+  }
+
+  .card-shadow {
+    box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+  }
+
+  .card-shadow-hover {
+    box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+  }
+
+  .gradient-green {
+    background: linear-gradient(135deg, #72b249 0%, #5d963a 100%);
+  }
+
+  .text-gradient-green {
+    background: linear-gradient(135deg, #72b249 0%, #5d963a 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+@layer utilities {
+  .text-green-cf {
+    color: var(--cf-green);
+  }
+
+  .bg-green-cf {
+    background-color: var(--cf-green);
+  }
+
+  .border-green-cf {
+    border-color: var(--cf-green);
+  }
+
+  .font-heading {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+
+  .font-body {
+    font-family: 'Poppins', sans-serif;
+  }
+
+  .font-mono-cf {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
