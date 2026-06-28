@@ -91,10 +91,10 @@ export default function Formations() {
           </ScrollReveal>
 
           <ScrollReveal delay={0.3}>
-            <div className="flex flex-wrap gap-2 mt-5">
+            <div className="mobile-chip-scroll flex md:flex-wrap gap-2 mt-5 overflow-x-auto md:overflow-visible -mx-4 px-4 md:mx-0 md:px-0 pb-2 md:pb-0 snap-x snap-mandatory">
               {categories.map((cat) => (
                 <button key={cat} onClick={() => { setActiveCategory(cat); setCurrentPage(1); }}
-                  className={`px-4 py-2 rounded-full text-[13px] font-medium transition-all duration-300 border ${activeCategory === cat ? 'text-white border-transparent' : 'bg-white border-[var(--cf-border)] hover:border-[#72b249]'}`}
+                  className={`shrink-0 whitespace-nowrap snap-start px-4 py-2.5 rounded-full text-[13px] font-medium transition-all duration-300 border touch-manipulation ${activeCategory === cat ? 'text-white border-transparent' : 'bg-white border-[var(--cf-border)] hover:border-[#72b249]'}`}
                   style={activeCategory === cat ? { backgroundColor: '#72b249' } : { color: 'var(--cf-gray-medium)' }}>
                   {cat}
                 </button>
@@ -152,7 +152,7 @@ export default function Formations() {
                       <div className="flex items-center justify-between">
                         <span className="font-heading text-lg font-bold" style={{ color: '#72b249' }}>{course.price.toLocaleString('fr-FR')} FCFA</span>
                         <button onClick={() => addItem({ id: course.id, title: course.title, price: course.price, image: course.image, instructor: course.instructor, duration: course.duration, category: course.category })}
-                          className="flex items-center gap-1 text-sm font-medium px-4 py-2 rounded-lg transition-all duration-300 hover:shadow-md"
+                          className="flex items-center gap-1 text-sm font-medium px-4 py-2 min-h-11 rounded-lg transition-all duration-300 hover:shadow-md touch-manipulation"
                           style={{ color: '#72b249', backgroundColor: '#eef6e8' }}>
                           <ShoppingCart size={14} /> Ajouter
                         </button>

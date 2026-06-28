@@ -28,7 +28,7 @@ const informations = [
 export default function Footer() {
   return (
     <footer>
-      <section className="w-full py-24 md:py-32 text-center" style={{ background: 'linear-gradient(to bottom, #eef6e8, #FFFFFF)' }}>
+      <section className="w-full py-16 sm:py-24 md:py-32 text-center" style={{ background: 'linear-gradient(to bottom, #eef6e8, #FFFFFF)' }}>
         <div className="container-cf">
           <h2 className="section-title max-w-[700px] mx-auto">
             Vous méritez de faire le choix de la <span style={{ color: '#72b249' }}>réussite</span>
@@ -118,7 +118,7 @@ export default function Footer() {
       <div className="w-full py-4 bg-white border-t" style={{ borderColor: 'var(--cf-border-light)' }}>
         <div className="container-cf flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-[13px]" style={{ color: 'var(--cf-gray-light)' }}>© 2025 CampusForma. Tous droits réservés.</p>
-          <div className="flex items-center gap-4 text-[13px]" style={{ color: 'var(--cf-gray)' }}>
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-[13px]" style={{ color: 'var(--cf-gray)' }}>
             <span className="cursor-pointer hover:text-[#72b249] transition-colors">Mentions légales</span>
             <span className="text-[var(--cf-border)]">·</span>
             <span className="cursor-pointer hover:text-[#72b249] transition-colors">Politique de confidentialité</span>

@@ -25,17 +25,17 @@ export default function Navbar() {
   return (
     <>
       <nav className="fixed top-0 left-0 right-0 z-[1000] bg-white/95 backdrop-blur-xl border-b border-[#E4E4E4]/80 shadow-[0_1px_12px_rgba(0,0,0,0.04)]">
-        <div className="container-cf h-[72px] flex items-center justify-between">
+        <div className="container-cf h-[72px] flex items-center justify-between gap-2">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
-            <div className="w-9 h-9 rounded-full flex items-center justify-center transition-transform duration-300 group-hover:scale-105" style={{ backgroundColor: '#72b249' }}>
+          <Link to="/" className="flex items-center gap-2 sm:gap-2.5 shrink-0 group">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-transform duration-300 group-hover:scale-105" style={{ backgroundColor: '#72b249' }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                 <text x="12" y="18" textAnchor="middle" fill="white" fontFamily="Plus Jakarta Sans" fontWeight="700" fontSize="16">C</text>
               </svg>
             </div>
             <div className="flex items-baseline">
-              <span className="font-heading text-xl font-bold text-black tracking-tight">Campus</span>
-              <span className="font-heading text-xl font-bold tracking-tight" style={{ color: '#72b249' }}>Forma</span>
+              <span className="font-heading text-lg sm:text-xl font-bold text-black tracking-tight">Campus</span>
+              <span className="font-heading text-lg sm:text-xl font-bold tracking-tight" style={{ color: '#72b249' }}>Forma</span>
             </div>
           </Link>
 
@@ -57,7 +57,7 @@ export default function Navbar() {
           </div>
 
           {/* Right side */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 sm:gap-3">
             {/* Cart */}
             <CartDrawer />
 
@@ -74,7 +74,7 @@ export default function Navbar() {
 
             {/* Mobile Hamburger */}
             <button
-              className="md:hidden flex items-center justify-center w-10 h-10 rounded-lg hover:bg-[#f7f7f7] transition-colors"
+              className="md:hidden flex items-center justify-center w-10 h-10 rounded-lg hover:bg-[#f7f7f7] transition-colors touch-manipulation"
               onClick={() => setMobileOpen(!mobileOpen)}
               aria-label="Menu"
             >

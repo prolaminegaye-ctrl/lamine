@@ -5,11 +5,9 @@ import {
   CheckCircle,
   Lock,
   Send,
-  CreditCard,
   Smartphone,
   Wallet,
   Building2,
-  CircleDollarSign,
 } from 'lucide-react';
 import ScrollReveal from '@/components/ui/ScrollReveal';
 
@@ -190,7 +188,7 @@ function PricingCard({
 }) {
   return (
     <div
-      className={`relative rounded-2xl p-8 bg-white transition-all duration-300 hover:-translate-y-1 ${
+      className={`relative rounded-2xl p-5 sm:p-8 bg-white transition-all duration-300 hover:-translate-y-1 ${
         recommended
           ? 'border-2 shadow-lg'
           : 'border shadow-sm'
@@ -315,7 +313,7 @@ export default function BilanVae() {
             <div className="flex gap-0 mt-10 border-b-2" style={{ borderColor: 'var(--cf-border-light)' }}>
               <button
                 onClick={() => setActiveTab('bilan')}
-                className={`px-6 md:px-8 py-4 text-base font-semibold transition-all duration-300 cursor-pointer ${
+                className={`flex-1 px-2 sm:px-6 md:px-8 py-4 text-sm sm:text-base font-semibold transition-all duration-300 cursor-pointer ${
                   activeTab === 'bilan'
                     ? 'border-b-[3px]'
                     : 'hover:text-black'
@@ -329,7 +327,7 @@ export default function BilanVae() {
               </button>
               <button
                 onClick={() => setActiveTab('vae')}
-                className={`px-6 md:px-8 py-4 text-base font-semibold transition-all duration-300 cursor-pointer ${
+                className={`flex-1 px-2 sm:px-6 md:px-8 py-4 text-sm sm:text-base font-semibold transition-all duration-300 cursor-pointer ${
                   activeTab === 'vae'
                     ? 'border-b-[3px]'
                     : 'hover:text-black'
@@ -491,7 +489,7 @@ export default function BilanVae() {
           </ScrollReveal>
 
           <ScrollReveal delay={0.2}>
-            <div className="bg-white rounded-2xl p-8 md:p-10 shadow-sm border border-[#EEEEEE] mt-10">
+            <div className="bg-white rounded-2xl p-5 sm:p-8 md:p-10 shadow-sm border border-[#EEEEEE] mt-10">
               {formSubmitted ? (
                 <div className="text-center py-8">
                   <div
@@ -671,9 +669,6 @@ export default function BilanVae() {
                 { name: 'Wave', Icon: Smartphone, color: '#00A8E8' },
                 { name: 'Orange Money', Icon: Wallet, color: '#FF6600' },
                 { name: 'Free Money', Icon: Building2, color: '#E30613' },
-                { name: 'Free Money', Icon: CreditCard, color: '#E30613' },
-                { name: 'Visa', Icon: CircleDollarSign, color: '#1A1F71' },
-                { name: 'Mastercard', Icon: CreditCard, color: '#EB001B' },
               ].map(({ name, Icon, color }) => (
                 <div
                   key={name}

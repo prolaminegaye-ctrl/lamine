@@ -62,6 +62,7 @@
 
   html {
     scroll-behavior: smooth;
+    overflow-x: clip;
   }
 
   body {
@@ -70,7 +71,7 @@
     color: var(--cf-gray-medium);
     line-height: 1.65;
     font-size: 15px;
-    overflow-x: hidden;
+    overflow-x: clip;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -94,6 +95,15 @@
     margin-right: auto;
     padding-left: 24px;
     padding-right: 24px;
+  }
+
+  .mobile-chip-scroll {
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mobile-chip-scroll::-webkit-scrollbar {
+    display: none;
   }
 
   .btn-primary {
@@ -241,6 +251,24 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+}
+
+@media (max-width: 639px) {
+  .container-cf {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .section-padding {
+    padding-top: 64px;
+    padding-bottom: 64px;
+  }
+
+  .btn-primary,
+  .btn-secondary,
+  .btn-outline {
+    min-height: 48px;
   }
 }
 

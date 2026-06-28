@@ -50,11 +50,11 @@ export default function Home() {
   return (
     <main>
       {/* HERO */}
-      <section className="relative min-h-screen w-full overflow-hidden pt-[72px]">
+      <section className="relative lg:min-h-screen w-full overflow-hidden pt-[72px]">
         <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(114,178,73,0.06), rgba(114,178,73,0))' }} />
         <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%2372b249' fill-opacity='1'%3E%3Cpath d='M20 20h10v10H20zM40 40h10v10H40zM60 60h10v10H60zM80 80h10v10H80zM100 100h10v10h-10zM120 120h10v10h-10zM140 140h10v10h-10zM160 160h10v10h-10zM180 180h10v10h-10z'/%3E%3C/g%3E%3C/svg%3E")` }} />
 
-        <div className="container-cf relative z-10 py-16 md:py-24 lg:py-28">
+        <div className="container-cf relative z-10 py-12 sm:py-16 md:py-24 lg:py-28">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
             <div>
               <ScrollReveal>
@@ -78,11 +78,11 @@ export default function Home() {
 
               <ScrollReveal delay={0.3}>
                 <div className="flex flex-wrap gap-4 mt-10">
-                  <Link to="/formations" className="btn-primary">
+                  <Link to="/formations" className="btn-primary w-full sm:w-auto">
                     <ArrowRight size={18} />
                     Explorer les formations
                   </Link>
-                  <Link to="/login" className="btn-secondary">
+                  <Link to="/login" className="btn-secondary w-full sm:w-auto">
                     Créer mon compte
                   </Link>
                 </div>
@@ -179,7 +179,7 @@ export default function Home() {
                       <span className="font-heading text-lg font-bold" style={{ color: '#72b249' }}>{course.price.toLocaleString('fr-FR')} FCFA</span>
                       <button
                         onClick={() => addItem({ id: course.id, title: course.title, price: course.price, image: course.image, instructor: course.instructor, duration: course.duration, category: course.category })}
-                        className="flex items-center gap-1 text-sm font-medium px-4 py-2 rounded-lg transition-all duration-300 hover:shadow-md"
+                        className="flex items-center gap-1 text-sm font-medium px-4 py-2 min-h-11 rounded-lg transition-all duration-300 hover:shadow-md touch-manipulation"
                         style={{ color: '#72b249', backgroundColor: '#eef6e8' }}
                       >
                         <ShoppingCart size={14} /> Ajouter
