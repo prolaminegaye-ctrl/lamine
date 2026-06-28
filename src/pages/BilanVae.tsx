@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   CheckCircle,
   Lock,
@@ -237,7 +237,8 @@ function PricingCard({
 
 /* ── MAIN COMPONENT ── */
 export default function BilanVae() {
-  const [activeTab, setActiveTab] = useState<TabType>('bilan');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab: TabType = searchParams.get('tab') === 'vae' ? 'vae' : 'bilan';
   const [formData, setFormData] = useState({
     prenom: '',
     nom: '',
@@ -249,6 +250,10 @@ export default function BilanVae() {
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [formError, setFormError] = useState('');
   const [formSubmitting, setFormSubmitting] = useState(false);
+
+  const selectTab = (tab: TabType) => {
+    setSearchParams({ tab }, { replace: true });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -312,7 +317,7 @@ export default function BilanVae() {
           <ScrollReveal delay={0.2}>
             <div className="flex gap-0 mt-10 border-b-2" style={{ borderColor: 'var(--cf-border-light)' }}>
               <button
-                onClick={() => setActiveTab('bilan')}
+                onClick={() => selectTab('bilan')}
                 className={`flex-1 px-2 sm:px-6 md:px-8 py-4 text-sm sm:text-base font-semibold transition-all duration-300 cursor-pointer ${
                   activeTab === 'bilan'
                     ? 'border-b-[3px]'
@@ -326,7 +331,7 @@ export default function BilanVae() {
                 Bilan de Compétences
               </button>
               <button
-                onClick={() => setActiveTab('vae')}
+                onClick={() => selectTab('vae')}
                 className={`flex-1 px-2 sm:px-6 md:px-8 py-4 text-sm sm:text-base font-semibold transition-all duration-300 cursor-pointer ${
                   activeTab === 'vae'
                     ? 'border-b-[3px]'
@@ -369,7 +374,10 @@ export default function BilanVae() {
                     </li>
                   ))}
                 </ul>
-                <button className="btn-primary mt-8">
+                <button
+                  onClick={() => document.getElementById('campusforma-contact')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="btn-primary mt-8"
+                >
                   {activeTab === 'bilan' ? 'Demander mon bilan' : 'Commencer ma VAE'}
                 </button>
               </div>
@@ -391,7 +399,7 @@ export default function BilanVae() {
       </section>
 
       {/* How it works */}
-      <section id="campusforma-contact" className="w-full py-20" style={{ backgroundColor: 'var(--cf-bg)' }}>
+      <section className="w-full py-20" style={{ backgroundColor: 'var(--cf-bg)' }}>
         <div className="container-cf">
           <ScrollReveal>
             <h2 className="section-title text-center">
@@ -428,31 +436,6 @@ export default function BilanVae() {
               </ScrollReveal>
             ))}
           </div>
-          {/* For VAE, add the 5th step below on mobile or in a second row */}
-          {activeTab === 'vae' && (
-            <div className="flex justify-center mt-6">
-              <ScrollReveal delay={0.6}>
-                <div className="bg-white rounded-2xl p-8 shadow-sm border border-[#EEEEEE] text-center max-w-sm">
-                  <div
-                    className="w-12 h-12 rounded-full flex items-center justify-center text-white text-lg font-bold mx-auto"
-                    style={{ backgroundColor: 'var(--cf-green)' }}
-                  >
-                    5
-                  </div>
-                  <h3 className="font-heading text-lg font-semibold text-black mt-5">{vaeSteps[4].title}</h3>
-                  <p className="text-sm mt-2 leading-relaxed" style={{ color: 'var(--cf-gray-light)' }}>
-                    {vaeSteps[4].description}
-                  </p>
-                  <span
-                    className="inline-block text-[13px] font-medium mt-4"
-                    style={{ color: 'var(--cf-green)' }}
-                  >
-                    {vaeSteps[4].duration}
-                  </span>
-                </div>
-              </ScrollReveal>
-            </div>
-          )}
         </div>
       </section>
 
@@ -479,7 +462,7 @@ export default function BilanVae() {
       </section>
 
       {/* Contact Form */}
-      <section className="w-full py-20" style={{ backgroundColor: 'var(--cf-bg)' }}>
+      <section id="campusforma-contact" className="w-full py-20 scroll-mt-24" style={{ backgroundColor: 'var(--cf-bg)' }}>
         <div className="container-cf max-w-[800px]">
           <ScrollReveal>
             <h2 className="section-title text-center">Prenez rendez-vous avec un conseiller</h2>
