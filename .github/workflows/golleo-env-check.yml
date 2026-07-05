@@ -34,5 +34,11 @@ jobs:
               print("Aucune variable d'environnement configuree sur ce projet.")
               print("Reponse brute (tronquee) :", json.dumps(data)[:300])
           for e in envs:
-              print("- %s  (targets: %s, type: %s)" % (e.get("key"), ",".join(e.get("target", [])), e.get("type")))
+              e.pop("value", None)
+              print(json.dumps(e))
           PY
+
+      - name: Re-test healthz production
+        run: |
+          curl -s https://www.golleo-emploi.com/api/healthz
+          echo
