@@ -1,0 +1,77 @@
+name: Deploy GolleO consolidated (golleo-smart-hire@main)
+
+# Workflow relais : déclenche un déploiement production Vercel du dépôt
+# consolidé golleo-smart-hire (branche main). Hébergé ici car le secret
+# VERCEL_TOKEN existe dans ce dépôt. Dès que le secret sera ajouté au dépôt
+# golleo-smart-hire, utiliser son propre workflow et supprimer celui-ci.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [claude/golleo-project-location-4mlyl1]
+    paths: ['.golleo-deploy-request']
+
+env:
+  PROJECT_ID: prj_iZja6BQ3UrMIeacqpmwiBDt7RhoO
+  TEAM_ID: team_pjZ6wWWlhkZm8cUYllxIehT9
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create production deployment from golleo-smart-hire@main
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          set -euo pipefail
+          TOKEN=$(echo -n "$VERCEL_TOKEN" | tr -d '\t\n\r ')
+          RESP=$(curl -s -X POST "https://api.vercel.com/v13/deployments?teamId=$TEAM_ID&forceNew=1" \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"name\": \"golleo-smart-hire\",
+              \"project\": \"$PROJECT_ID\",
+              \"target\": \"production\",
+              \"gitSource\": {
+                \"type\": \"github\",
+                \"org\": \"prolaminegaye-ctrl\",
+                \"repo\": \"golleo-smart-hire\",
+                \"ref\": \"main\"
+              }
+            }")
+          DPL_ID=$(echo "$RESP" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("id",""))')
+          if [ -z "$DPL_ID" ]; then
+            echo "Échec de création du déploiement :"
+            echo "$RESP" | head -c 2000
+            exit 1
+          fi
+          echo "Déploiement créé : $DPL_ID"
+          echo "DPL_ID=$DPL_ID" >> "$GITHUB_ENV"
+
+      - name: Wait for deployment to be READY
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          set -euo pipefail
+          TOKEN=$(echo -n "$VERCEL_TOKEN" | tr -d '\t\n\r ')
+          for i in $(seq 1 60); do
+            STATE=$(curl -s "https://api.vercel.com/v13/deployments/$DPL_ID?teamId=$TEAM_ID" \
+              -H "Authorization: Bearer $TOKEN" \
+              | python3 -c 'import json,sys; print(json.load(sys.stdin).get("readyState",""))')
+            echo "[$i] readyState=$STATE"
+            case "$STATE" in
+              READY) exit 0 ;;
+              ERROR|CANCELED) echo "Le déploiement a échoué ($STATE)"; exit 1 ;;
+            esac
+            sleep 10
+          done
+          echo "Timeout d'attente du déploiement"; exit 1
+
+      - name: Verify production
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' https://www.golleo-emploi.com/)
+          echo "Frontend : HTTP $code"
+          echo "API healthz :"
+          curl -s https://www.golleo-emploi.com/api/healthz
+          echo
+          [ "$code" = "200" ]
