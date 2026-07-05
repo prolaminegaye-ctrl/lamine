@@ -1,0 +1,38 @@
+name: Check GolleO Vercel env vars
+
+# Diagnostic : liste les NOMS des variables d'environnement du projet Vercel
+# golleo-smart-hire (jamais les valeurs). Sert à vérifier que ANTHROPIC_API_KEY,
+# SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY sont bien configurées.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [claude/golleo-project-location-4mlyl1]
+    paths: ['.golleo-env-check-request']
+
+env:
+  PROJECT_ID: prj_iZja6BQ3UrMIeacqpmwiBDt7RhoO
+  TEAM_ID: team_pjZ6wWWlhkZm8cUYllxIehT9
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: List env var names (no values)
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          set -euo pipefail
+          TOKEN=$(echo -n "$VERCEL_TOKEN" | tr -d '\t\n\r ')
+          curl -s "https://api.vercel.com/v9/projects/$PROJECT_ID/env?teamId=$TEAM_ID" \
+            -H "Authorization: Bearer $TOKEN" \
+            | python3 -c '
+          import json, sys
+          data = json.load(sys.stdin)
+          envs = data.get("envs", [])
+          if not envs:
+              print("Aucune variable d'"'"'environnement configurée sur ce projet.")
+              print("Réponse brute (tronquée) :", json.dumps(data)[:300])
+          for e in envs:
+              print(f"- {e.get('key')}  (targets: {','.join(e.get('target', []))}, type: {e.get('type')})")
+          '
