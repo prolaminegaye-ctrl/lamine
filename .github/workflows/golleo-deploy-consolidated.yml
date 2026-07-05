@@ -31,6 +31,15 @@ jobs:
             -d '{"key":"GOLLEO_ENV_PROBE","value":"probe-ok","type":"plain","target":["production","preview"]}' \
             | head -c 200
           echo
+          # SUPABASE_URL est une valeur publique (pas un secret) — on la pose ici.
+          # SUPABASE_SERVICE_ROLE_KEY et ANTHROPIC_API_KEY restent à saisir dans
+          # le dashboard Vercel (valeurs secrètes non disponibles ici).
+          curl -s -X POST "https://api.vercel.com/v10/projects/$PROJECT_ID/env?teamId=$TEAM_ID&upsert=true" \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"key":"SUPABASE_URL","value":"https://taimtpltpaxugfcmwsux.supabase.co","type":"plain","target":["production","preview"]}' \
+            | head -c 200
+          echo
 
       - name: Create production deployment from golleo-smart-hire@main
         env:
