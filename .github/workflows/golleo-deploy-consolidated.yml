@@ -19,6 +19,19 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Set probe env var (diagnostic injection env)
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          set -euo pipefail
+          TOKEN=$(echo -n "$VERCEL_TOKEN" | tr -d '\t\n\r ')
+          curl -s -X POST "https://api.vercel.com/v10/projects/$PROJECT_ID/env?teamId=$TEAM_ID&upsert=true" \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"key":"GOLLEO_ENV_PROBE","value":"probe-ok","type":"plain","target":["production","preview"]}' \
+            | head -c 200
+          echo
+
       - name: Create production deployment from golleo-smart-hire@main
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
