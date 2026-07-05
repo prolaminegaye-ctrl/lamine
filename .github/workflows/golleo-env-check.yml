@@ -25,14 +25,14 @@ jobs:
           set -euo pipefail
           TOKEN=$(echo -n "$VERCEL_TOKEN" | tr -d '\t\n\r ')
           curl -s "https://api.vercel.com/v9/projects/$PROJECT_ID/env?teamId=$TEAM_ID" \
-            -H "Authorization: Bearer $TOKEN" \
-            | python3 -c '
-          import json, sys
-          data = json.load(sys.stdin)
+            -H "Authorization: Bearer $TOKEN" -o /tmp/envs.json
+          python3 - <<'PY'
+          import json
+          data = json.load(open("/tmp/envs.json"))
           envs = data.get("envs", [])
           if not envs:
-              print("Aucune variable d'"'"'environnement configurée sur ce projet.")
-              print("Réponse brute (tronquée) :", json.dumps(data)[:300])
+              print("Aucune variable d'environnement configuree sur ce projet.")
+              print("Reponse brute (tronquee) :", json.dumps(data)[:300])
           for e in envs:
-              print(f"- {e.get('key')}  (targets: {','.join(e.get('target', []))}, type: {e.get('type')})")
-          '
+              print("- %s  (targets: %s, type: %s)" % (e.get("key"), ",".join(e.get("target", [])), e.get("type")))
+          PY
