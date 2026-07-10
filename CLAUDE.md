@@ -32,7 +32,10 @@ Il n'existe **aucun test automatisé** pour le moment (ni unitaire, ni e2e). Les
 - `src/lib/supabase.ts` — client Supabase (URL + clé *publishable*, valeurs publiques par conception, surchargées par `VITE_SUPABASE_URL` / `VITE_SUPABASE_PUBLISHABLE_KEY`).
 - `src/data/` — contenu éditorial statique et catalogue de secours.
 - `supabase/migrations/` — schéma, RLS, fonctions RPC.
-- `.github/agents/` — architecture des agents autonomes (voir `.github/agents/README.md`).
+- `agents/` — prompts système permanents des 4 agents autonomes.
+- `.github/workflows/` — CI + workflows des agents.
+- `docs/agent-governance.md` — gouvernance des agents (labels, risques, anti-boucle, activation).
+- `docs/rollback-procedure.md` — procédure de retour arrière.
 
 ## Zones sensibles — NE PAS TOUCHER sans validation humaine explicite
 
@@ -60,4 +63,8 @@ Il n'existe **aucun test automatisé** pour le moment (ni unitaire, ni e2e). Les
 Créer la variable de repository `AGENTS_ENABLED` avec la valeur `false`
 (GitHub → Settings → Secrets and variables → Actions → Variables).
 Tous les workflows d'agents vérifient cette variable et s'arrêtent immédiatement.
-Détails : `.github/agents/README.md`.
+Détails : `docs/agent-governance.md` §10.
+
+Par défaut (variable absente), les déclencheurs automatiques sont **désarmés** : seuls les
+lancements manuels fonctionnent. L'armement se fait en créant `AGENTS_ENABLED` = `true`
+(checklist complète : `docs/agent-governance.md` §9).
