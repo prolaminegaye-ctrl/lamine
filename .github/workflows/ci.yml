@@ -1,0 +1,51 @@
+# Contrôles d'intégration continue : typecheck + lint + build + audit.
+# C'est ce workflow que l'Incident Watcher surveille (échecs sur la branche principale)
+# et sur lequel s'appuient le Debug Engineer et le QA Reviewer.
+
+name: "CI"
+
+on:
+  push:
+    branches:
+      - main
+      - claude/make-site-functional-7if3x
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Installation
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      # Informatif pour l'instant : une CVE tierce ne doit pas déclencher d'incident à elle seule.
+      - name: Audit des dépendances runtime
+        run: npm audit --omit=dev --audit-level=high
+        continue-on-error: true
