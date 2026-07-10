@@ -9,7 +9,7 @@ et sans risque.
 Vercel conserve chaque déploiement précédent : revenir en arrière ne reconstruit rien et ne
 touche pas au code.
 
-1. Ouvrir [vercel.com](https://vercel.com) → projet **etagia-lms**.
+1. Ouvrir [vercel.com](https://vercel.com) → projet **campusforma**.
 2. Onglet **Deployments** : repérer le dernier déploiement **sain** (celui d'avant l'incident,
    état *Ready*).
 3. Menu **⋯** du déploiement sain → **Instant Rollback** (ou **Promote to Production**).
