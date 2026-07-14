@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Deux ouvrages pour maîtriser l'IA — L'IA sous contrôle</title>
+  <meta name="description" content="Deux ouvrages pratiques pour comprendre et garder la main sur l'intelligence artificielle. Disponibles en ebook au format PDF, 19,90 € chacun." />
+
+  <!--
+    ══════════════════════════════════════════════════════════════
+    À FINALISER — 3 valeurs à remplacer avant mise en ligne :
+      1. PAYHIP_LIVRE_1  → lien Payhip du premier ouvrage (cover-front.png)
+      2. PAYHIP_LIVRE_2  → lien Payhip de « L'IA sous contrôle »
+      3. TITRE_LIVRE_1   → titre exact du premier ouvrage (3 occurrences)
+    Rechercher ces trois jetons dans ce fichier (Ctrl+F).
+    Images attendues à la racine du site : cover-front.png (déjà en ligne)
+    et cover-ia-sous-controle.jpg (à déposer avec ce fichier).
+    ══════════════════════════════════════════════════════════════
+  -->
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --marine: #0b1a33;
+      --marine-2: #122544;
+      --marine-3: #1a3156;
+      --dore: #d4af37;
+      --dore-clair: #e8cd7a;
+      --creme: #f6f1e6;
+      --texte: #e9edf5;
+      --texte-doux: #b8c2d6;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--marine);
+      color: var(--texte);
+      line-height: 1.65;
+    }
+    h1, h2, h3 { font-family: 'Playfair Display', Georgia, serif; color: var(--creme); }
+    img { max-width: 100%; display: block; }
+    .conteneur { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+    .filet { width: 72px; height: 2px; background: var(--dore); margin: 18px auto; border: 0; }
+
+    /* ——— En-tête / héros ——— */
+    header {
+      padding: 72px 0 56px;
+      text-align: center;
+      background: radial-gradient(ellipse at 50% -20%, var(--marine-3), var(--marine) 70%);
+    }
+    .surtitre {
+      color: var(--dore);
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    header h1 { font-size: clamp(1.9rem, 4.5vw, 3.1rem); margin: 14px 0 10px; }
+    header p.accroche { color: var(--texte-doux); max-width: 620px; margin: 0 auto; font-size: 1.05rem; }
+
+    .duo {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      gap: 48px;
+      margin-top: 48px;
+      flex-wrap: wrap;
+    }
+    .duo figure { width: 240px; }
+    .couverture {
+      position: relative;
+      aspect-ratio: 2 / 3;
+      border-radius: 6px;
+      overflow: hidden;
+      background: linear-gradient(160deg, var(--marine-3), var(--marine-2));
+      border: 1px solid rgba(212, 175, 55, 0.45);
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
+    }
+    .couverture img { width: 100%; height: 100%; object-fit: cover; position: relative; z-index: 1; }
+    .couverture .substitut {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px; text-align: center;
+      font-family: 'Playfair Display', serif;
+      color: var(--dore-clair); font-size: 1.15rem;
+    }
+    .duo figcaption { margin-top: 14px; text-align: center; color: var(--texte-doux); font-size: 0.9rem; }
+
+    /* ——— Boutons ——— */
+    .bouton {
+      display: inline-block;
+      background: var(--dore);
+      color: var(--marine);
+      font-weight: 600;
+      padding: 14px 34px;
+      border-radius: 4px;
+      text-decoration: none;
+      letter-spacing: 0.02em;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+    .bouton:hover { background: var(--dore-clair); transform: translateY(-1px); }
+    .prix { color: var(--dore); font-weight: 600; font-size: 1.3rem; }
+    .prix small { color: var(--texte-doux); font-weight: 400; font-size: 0.85rem; }
+
+    /* ——— Sections livres ——— */
+    section.livre { padding: 76px 0; }
+    section.livre:nth-of-type(even) { background: var(--marine-2); }
+    .fiche {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 56px;
+      align-items: center;
+    }
+    .fiche.inverse { grid-template-columns: 1fr 260px; }
+    .fiche.inverse .visuel { order: 2; }
+    .fiche h2 { font-size: clamp(1.5rem, 3vw, 2.1rem); margin-bottom: 6px; }
+    .fiche .sous-titre { color: var(--dore-clair); font-style: italic; margin-bottom: 18px; }
+    .fiche p { color: var(--texte-doux); margin-bottom: 14px; }
+    .fiche ul { list-style: none; margin: 18px 0 26px; }
+    .fiche li { padding-left: 26px; position: relative; margin-bottom: 10px; color: var(--texte); }
+    .fiche li::before { content: '—'; position: absolute; left: 0; color: var(--dore); }
+    .achat { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+
+    /* ——— Bloc final ——— */
+    .final {
+      padding: 84px 0;
+      text-align: center;
+      background: radial-gradient(ellipse at 50% 120%, var(--marine-3), var(--marine) 70%);
+    }
+    .final h2 { font-size: clamp(1.6rem, 3.2vw, 2.3rem); }
+    .final p { color: var(--texte-doux); max-width: 560px; margin: 0 auto 36px; }
+    .cartes { display: flex; justify-content: center; gap: 32px; flex-wrap: wrap; }
+    .carte {
+      background: var(--marine-2);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      border-radius: 8px;
+      padding: 32px 28px;
+      width: 320px;
+    }
+    .carte h3 { font-size: 1.2rem; margin-bottom: 8px; }
+    .carte .prix { display: block; margin: 12px 0 20px; }
+
+    footer { padding: 36px 0; text-align: center; color: var(--texte-doux); font-size: 0.85rem; border-top: 1px solid rgba(212, 175, 55, 0.2); }
+
+    @media (max-width: 760px) {
+      .fiche, .fiche.inverse { grid-template-columns: 1fr; gap: 32px; }
+      .fiche.inverse .visuel { order: 0; }
+      .fiche .visuel { max-width: 240px; margin: 0 auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="conteneur">
+      <p class="surtitre">Collection · Intelligence artificielle</p>
+      <h1>Comprendre l'IA. La garder sous contrôle.</h1>
+      <hr class="filet" />
+      <p class="accroche">Deux ouvrages complémentaires pour saisir ce que l'intelligence artificielle change réellement — et reprendre la main, dans sa vie comme dans son travail.</p>
+
+      <div class="duo">
+        <figure>
+          <div class="couverture">
+            <span class="substitut">TITRE_LIVRE_1</span>
+            <img src="cover-front.png" alt="Couverture : TITRE_LIVRE_1" onerror="this.style.display='none'" />
+          </div>
+          <figcaption>TITRE_LIVRE_1 · 19,90 €</figcaption>
+        </figure>
+        <figure>
+          <div class="couverture">
+            <span class="substitut">L'IA sous contrôle</span>
+            <img src="cover-ia-sous-controle.jpg" alt="Couverture : L'IA sous contrôle" onerror="this.style.display='none'" />
+          </div>
+          <figcaption>L'IA sous contrôle · 19,90 €</figcaption>
+        </figure>
+      </div>
+    </div>
+  </header>
+
+  <section class="livre">
+    <div class="conteneur fiche">
+      <figure class="visuel">
+        <div class="couverture">
+          <span class="substitut">TITRE_LIVRE_1</span>
+          <img src="cover-front.png" alt="Couverture : TITRE_LIVRE_1" onerror="this.style.display='none'" />
+        </div>
+      </figure>
+      <div>
+        <h2>TITRE_LIVRE_1</h2>
+        <p class="sous-titre">Le premier ouvrage de la collection</p>
+        <p>Une entrée en matière claire et exigeante : ce que l'IA sait faire, ce qu'elle ne sait pas faire, et comment s'en servir sans s'y perdre.</p>
+        <ul>
+          <li>Format PDF, lecture immédiate après achat</li>
+          <li>Paiement sécurisé via Payhip</li>
+          <li>Accès à vie, mises à jour incluses</li>
+        </ul>
+        <div class="achat">
+          <a class="bouton" href="https://payhip.com/b/PAYHIP_LIVRE_1">Acheter — 19,90 €</a>
+          <span class="prix">19,90 € <small>TTC</small></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="livre">
+    <div class="conteneur fiche inverse">
+      <figure class="visuel">
+        <div class="couverture">
+          <span class="substitut">L'IA sous contrôle</span>
+          <img src="cover-ia-sous-controle.jpg" alt="Couverture : L'IA sous contrôle" onerror="this.style.display='none'" />
+        </div>
+      </figure>
+      <div>
+        <h2>L'IA sous contrôle</h2>
+        <p class="sous-titre">Le nouvel ouvrage</p>
+        <p>Méthodes, garde-fous et pratiques concrètes pour déléguer à l'IA sans jamais perdre la maîtrise : cadrer, vérifier, décider en dernier ressort.</p>
+        <ul>
+          <li>Format PDF, lecture immédiate après achat</li>
+          <li>Paiement sécurisé via Payhip</li>
+          <li>Accès à vie, mises à jour incluses</li>
+        </ul>
+        <div class="achat">
+          <a class="bouton" href="https://payhip.com/b/PAYHIP_LIVRE_2">Acheter — 19,90 €</a>
+          <span class="prix">19,90 € <small>TTC</small></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="final">
+    <div class="conteneur">
+      <h2>Prêt à passer du côté de ceux qui décident&nbsp;?</h2>
+      <hr class="filet" />
+      <p>Chaque ouvrage se lit indépendamment. Ensemble, ils forment un parcours complet — de la compréhension à la maîtrise.</p>
+      <div class="cartes">
+        <div class="carte">
+          <h3>TITRE_LIVRE_1</h3>
+          <span class="prix">19,90 €</span>
+          <a class="bouton" href="https://payhip.com/b/PAYHIP_LIVRE_1">Acheter</a>
+        </div>
+        <div class="carte">
+          <h3>L'IA sous contrôle</h3>
+          <span class="prix">19,90 €</span>
+          <a class="bouton" href="https://payhip.com/b/PAYHIP_LIVRE_2">Acheter</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="conteneur">
+      <p>© 2026 — Tous droits réservés · Paiement sécurisé par Payhip</p>
+    </div>
+  </footer>
+
+</body>
+</html>
