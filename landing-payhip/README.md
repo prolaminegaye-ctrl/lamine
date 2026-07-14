@@ -7,20 +7,25 @@ Les fichiers finaux de la session Cowork (avec les vrais liens Payhip et la couv
 `cover-ia-sous-controle.jpg`) sont restés sur la machine locale ; cette version est prête
 à l'emploi à trois substitutions près.
 
+La couverture `cover-ia-sous-controle.jpg` (présente dans ce dossier) a été extraite de la
+planche de couverture officielle (`Couverture_LIA_Sous_Controle_FINAL.pdf`, face avant,
+800 × 1230 px, optimisée web). Les textes de la section « L'IA sous contrôle » reprennent
+la 4e de couverture et le sommaire du manuscrit.
+
 ## À remplacer avant mise en ligne (Ctrl+F dans `index.html`)
 
-| Jeton | Valeur attendue | Occurrences |
-|---|---|---|
-| `PAYHIP_LIVRE_1` | code du lien Payhip du premier ouvrage | 2 |
-| `PAYHIP_LIVRE_2` | code du lien Payhip de « L'IA sous contrôle » | 2 |
-| `TITRE_LIVRE_1` | titre exact du premier ouvrage | 6 |
+| Jeton | Valeur attendue |
+|---|---|
+| `PAYHIP_LIVRE_1` | code du lien Payhip du premier ouvrage (2 occurrences) |
+| `PAYHIP_LIVRE_2` | code du lien Payhip de « L'IA sous contrôle » (2 occurrences) |
+| `TITRE_LIVRE_1` | titre exact du premier ouvrage (toutes les occurrences) |
 
 ## Mise en ligne (Netlify)
 
 Déposer à la racine du site (drag & drop dans l'espace Netlify) :
 
-1. `index.html` (ce dossier, une fois les jetons remplacés) ;
-2. `cover-ia-sous-controle.jpg` (couverture du nouveau livre, produite dans la session Cowork) ;
+1. `index.html` (une fois les jetons remplacés) ;
+2. `cover-ia-sous-controle.jpg` (ce dossier) ;
 3. `cover-front.png` est déjà présent sur le site — rien à faire.
 
 Si les images sont absentes, la page affiche automatiquement une couverture de
