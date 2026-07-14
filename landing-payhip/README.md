@@ -16,9 +16,11 @@ la 4e de couverture et le sommaire du manuscrit.
 
 | Jeton | Valeur attendue |
 |---|---|
-| `PAYHIP_LIVRE_1` | code du lien Payhip du premier ouvrage (2 occurrences) |
+| `PAYHIP_LIVRE_1` | code du lien Payhip du « Manuel du Formateur Augmenté » (2 occurrences) |
 | `PAYHIP_LIVRE_2` | code du lien Payhip de « L'IA sous contrôle » (2 occurrences) |
-| `TITRE_LIVRE_1` | titre exact du premier ouvrage (toutes les occurrences) |
+
+Les liens s'obtiennent dans Payhip → Produits → bouton « Partager / Intégrer »
+de chaque livre (format `https://payhip.com/b/XXXXX`).
 
 ## Mise en ligne (Netlify)
 
