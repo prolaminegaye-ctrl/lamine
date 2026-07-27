@@ -41,6 +41,36 @@ source ~/.zshrc
 
 Get a Gemini API key at: https://aistudio.google.com/apikey
 
+## Notes d'environnement (sessions Claude Code distantes)
+
+Dans les conteneurs Claude Code distants, deux écarts par rapport à une machine locale :
+
+**1. Bun ne joint pas l'API Gemini.** Le runtime `fetch` de Bun échoue en
+`ECONNRESET` sur `generativelanguage.googleapis.com` à travers le proxy du
+conteneur, alors que `curl` et Node passent sans problème. Ce n'est ni un
+problème de certificat (`rejectUnauthorized: false` échoue pareil) ni un blocage
+du proxy (aucune entrée dans `recentRelayFailures`). Remplacer le lien global par
+un lanceur Node — attention, `bun link` crée un lien symbolique, il faut le
+supprimer avant d'écrire sinon on écrase `src/cli.ts` :
+
+```bash
+rm -f ~/.bun/bin/nano-banana
+cat > ~/.bun/bin/nano-banana <<'SH'
+#!/usr/bin/env bash
+exec node --experimental-strip-types --no-warnings \
+  "${NANO_BANANA_HOME:-$HOME/tools/nano-banana-2}/src/cli.ts" "$@"
+SH
+chmod +x ~/.bun/bin/nano-banana
+```
+
+**2. Le mode transparent (`-t`) est indisponible** : ffmpeg et ImageMagick ne
+sont pas installés. Toutes les autres options fonctionnent.
+
+**Quota image :** les modèles image de Gemini ont un quota gratuit à zéro
+(`limit: 0` sur `generate_content_free_tier_requests`). Une clé sans facturation
+activée génère du texte mais renvoie un 429 sur toute génération d'image. Il faut
+activer la facturation sur le projet Google Cloud associé à la clé.
+
 ## Quick Reference
 
 - Command: `nano-banana "prompt" [options]`
