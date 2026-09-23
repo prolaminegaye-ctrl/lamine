@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Section from "@/components/Section";
 import Card from "@/components/Card";
 import Button from "@/components/Button";
@@ -83,6 +84,16 @@ export default function Home() {
     <>
       {/* Hero */}
       <div className="relative overflow-hidden bg-creme">
+        <div className="absolute inset-0" aria-hidden="true">
+          <Image
+            src="/images/hero-priere-plage.jpg"
+            alt=""
+            fill
+            priority
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-creme/78" />
+        </div>
         <div
           aria-hidden="true"
           className="pointer-events-none absolute -top-32 right-[-10%] h-96 w-96 rounded-full bg-lavande/30 blur-3xl"
@@ -124,8 +135,19 @@ export default function Home() {
 
       {/* Un instant pour vous */}
       <Section tone="soft">
-        <div className="mx-auto max-w-3xl text-center">
+        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
           <FadeIn>
+            <div className="relative aspect-[4/5] w-full overflow-hidden rounded-[2.5rem] shadow-sm">
+              <Image
+                src="/images/meditation-interieur.jpg"
+                alt="Femme assise en pleine conscience dans un intérieur lumineux et épuré"
+                fill
+                className="object-cover"
+                sizes="(min-width: 1024px) 40vw, 90vw"
+              />
+            </div>
+          </FadeIn>
+          <FadeIn delay={0.15}>
             <h2 className="font-heading text-3xl text-ink sm:text-4xl">
               Un instant pour vous
             </h2>
@@ -268,17 +290,46 @@ export default function Home() {
             </p>
           </FadeIn>
         </div>
+        <FadeIn delay={0.2}>
+          <div className="relative mx-auto mt-12 aspect-[16/9] w-full max-w-4xl overflow-hidden rounded-[2.5rem] shadow-sm">
+            <Image
+              src="/images/piscine-jardin-tropical.jpg"
+              alt="Jardin tropical apaisant et bassin d'eau évoquant l'atmosphère paisible de Saly"
+              fill
+              className="object-cover"
+              sizes="(min-width: 1024px) 60vw, 90vw"
+            />
+          </div>
+          <p className="mt-4 text-center text-xs text-ink/50">
+            Photo d&apos;illustration — cadre représentatif de l&apos;atmosphère Maisha Zen
+          </p>
+        </FadeIn>
       </Section>
 
       {/* Déroulé d'une séance */}
       <Section>
-        <FadeIn>
-          <div className="mx-auto max-w-2xl text-center">
+        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
+          <FadeIn>
+            <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[2.5rem] shadow-sm">
+              <Image
+                src="/images/yoga-piscine-tropicale.jpg"
+                alt="Étirement en pleine conscience dans un jardin tropical au bord de l'eau"
+                fill
+                className="object-cover"
+                sizes="(min-width: 1024px) 40vw, 90vw"
+              />
+            </div>
+          </FadeIn>
+          <FadeIn delay={0.15}>
             <h2 className="font-heading text-3xl text-ink sm:text-4xl">
               Comment se déroule une séance ?
             </h2>
-          </div>
-        </FadeIn>
+            <p className="mt-4 text-ink/70">
+              Un parcours simple, en douceur, pensé pour vous accompagner du premier
+              échange jusqu&apos;au retour au calme.
+            </p>
+          </FadeIn>
+        </div>
         <div className="mt-14 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {etapes.map((e, i) => (
             <FadeIn key={e.n} delay={i * 0.1}>
