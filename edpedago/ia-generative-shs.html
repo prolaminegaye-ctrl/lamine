@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EdPedago — L’IA générative en sciences humaines et sociales</title>
+<meta name="description" content="Parcours de 30 minutes : comprendre l’IA générative, expérimenter ses usages en SHS et exercer son esprit critique.">
+<style>
+  :root {
+    --bg: #f7f6f2;
+    --surface: #ffffff;
+    --ink: #17181c;
+    --muted: #5d6169;
+    --line: #e6e3da;
+    --brand: #3d3bd6;
+    --brand-soft: #ececff;
+    --accent: #e8590c;
+    --radius: 18px;
+    --shadow: 0 1px 2px rgba(23,24,28,.04), 0 12px 32px -12px rgba(23,24,28,.12);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1014; --surface: #17181f; --ink: #f1f0ec; --muted: #a0a4ad;
+      --line: #2a2c36; --brand: #8b8cff; --brand-soft: #1f2040; --accent: #ff8a4c;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 32px -12px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1014; --surface: #17181f; --ink: #f1f0ec; --muted: #a0a4ad;
+    --line: #2a2c36; --brand: #8b8cff; --brand-soft: #1f2040; --accent: #ff8a4c;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 32px -12px rgba(0,0,0,.6);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.65 "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 0 16px; }
+
+  /* Marque EdPedago (remplace le logo Coursebox) */
+  header.top { padding: 22px 0; }
+  .brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); }
+  .brand-mark {
+    width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center;
+    background: linear-gradient(135deg, var(--brand), #6c63ff); color: #fff;
+    font: 800 17px/1 "Inter", system-ui, sans-serif; letter-spacing: -.02em;
+  }
+  .brand-name { font-weight: 700; font-size: 20px; letter-spacing: -.02em; }
+  .brand-name span { color: var(--brand); }
+
+  .hero { padding: 36px 0 28px; }
+  .eyebrow {
+    display: inline-block; font-size: 12.5px; font-weight: 600; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--brand); background: var(--brand-soft);
+    padding: 6px 12px; border-radius: 999px;
+  }
+  h1 {
+    font-size: clamp(28px, 5vw, 46px); line-height: 1.12; letter-spacing: -.03em;
+    margin: 18px 0 16px; font-weight: 800;
+  }
+  .lead { font-size: 18px; color: var(--muted); max-width: 700px; margin: 0 0 24px; }
+  .meta { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 28px; padding: 0; list-style: none; }
+  .meta li {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 999px;
+    padding: 7px 14px; font-size: 14px; color: var(--muted);
+  }
+  .meta b { color: var(--ink); font-weight: 600; }
+  .cta {
+    display: inline-block; background: var(--ink); color: var(--bg); text-decoration: none;
+    font-weight: 600; padding: 13px 24px; border-radius: 12px; transition: transform .15s ease;
+  }
+  .cta:hover { transform: translateY(-2px); }
+  .author { margin-top: 18px; font-size: 14px; color: var(--muted); }
+
+  section { padding: 30px 0; }
+  h2 { font-size: 24px; letter-spacing: -.02em; margin: 0 0 18px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+
+  .objectives { padding: 8px 26px; margin: 0; list-style: none; counter-reset: obj; }
+  .objectives li {
+    counter-increment: obj; display: flex; gap: 16px; padding: 16px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .objectives li:last-child { border-bottom: 0; }
+  .objectives li::before {
+    content: counter(obj); flex: none; width: 28px; height: 28px; border-radius: 50%;
+    background: var(--brand-soft); color: var(--brand); font-weight: 700; font-size: 14px;
+    display: grid; place-items: center; margin-top: 2px;
+  }
+
+  /* Modules */
+  .modules { display: grid; gap: 14px; }
+  details.module { overflow: hidden; }
+  details.module summary {
+    list-style: none; cursor: pointer; display: flex; align-items: center; gap: 16px; padding: 20px 24px;
+  }
+  details.module summary::-webkit-details-marker { display: none; }
+  .num {
+    flex: none; width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center;
+    background: var(--brand-soft); color: var(--brand); font-weight: 800;
+  }
+  .m-title { flex: 1; font-weight: 600; font-size: 17px; line-height: 1.35; }
+  .m-title small { display: block; font-weight: 500; color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .chev { flex: none; width: 10px; height: 10px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg); transition: transform .2s; }
+  details[open] .chev { transform: rotate(-135deg); }
+  .lesson { padding: 4px 24px 22px 82px; }
+  .lesson-row {
+    display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px;
+    border: 1px dashed var(--line); border-radius: 12px;
+  }
+  .lesson-row .tag { flex: none; font-size: 12px; font-weight: 700; color: var(--accent); padding-top: 3px; }
+  .lesson-row p { margin: 0; }
+  .todo { color: var(--muted); font-style: italic; }
+  @media (max-width: 560px) { .lesson { padding-left: 24px; } details.module summary { padding: 16px; } }
+
+  .skills { display: flex; flex-wrap: wrap; gap: 10px; padding: 0; margin: 0; list-style: none; }
+  .skills li {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 999px;
+    padding: 9px 16px; font-size: 14.5px; font-weight: 500;
+  }
+
+  footer { padding: 36px 0 56px; color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); margin-top: 24px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <a class="brand" href="#" aria-label="EdPedago">
+      <span class="brand-mark" aria-hidden="true">Ed</span>
+      <span class="brand-name">Ed<span>Pedago</span></span>
+    </a>
+  </header>
+
+  <main>
+    <div class="hero">
+      <span class="eyebrow">Démonstrateur · 30 minutes</span>
+      <h1>L’intelligence artificielle générative en sciences humaines et sociales : comprendre, expérimenter et exercer son esprit critique</h1>
+      <p class="lead">Un démonstrateur indépendant produit par EdPedago pour découvrir le fonctionnement général des IA génératives, expérimenter leurs usages en sciences humaines et sociales et apprendre à vérifier leurs productions.</p>
+      <ul class="meta">
+        <li><b>5</b> séquences</li>
+        <li><b>30 min</b> de parcours</li>
+        <li>Activités courtes · 3 cas disciplinaires</li>
+        <li>Étude de cas à embranchements</li>
+        <li>Évaluation formative</li>
+      </ul>
+      <a class="cta" href="#modules">Découvrir les modules</a>
+      <p class="author">Conçu par Lamine GAYE</p>
+    </div>
+
+    <section id="objectifs">
+      <h2>Objectifs du parcours</h2>
+      <ol class="objectives card">
+        <li>Expliquer le fonctionnement général d’une IA générative et d’un grand modèle de langage.</li>
+        <li>Identifier au moins trois usages pertinents de l’IA générative en sciences humaines et sociales.</li>
+        <li>Reconnaître les risques d’hallucination, de biais, de confidentialité et de dépendance cognitive.</li>
+        <li>Vérifier méthodiquement une réponse produite par une IA.</li>
+        <li>Adopter une pratique responsable, critique et documentée de l’IA dans ses activités universitaires.</li>
+      </ol>
+    </section>
+
+    <section id="modules">
+      <h2>Contenu du parcours</h2>
+      <div class="modules">
+
+        <details class="module card" open>
+          <summary>
+            <span class="num">1</span>
+            <span class="m-title">Séquence 1 — Immersion et problématisation<small>1 leçon</small></span>
+            <span class="chev" aria-hidden="true"></span>
+          </summary>
+          <div class="lesson">
+            <div class="lesson-row">
+              <span class="tag">1.1</span>
+              <p>Une réponse convaincante est-elle nécessairement fiable ?</p>
+            </div>
+          </div>
+        </details>
+
+        <details class="module card">
+          <summary>
+            <span class="num">2</span>
+            <span class="m-title">Séquence 2 — Comprendre l’IA générative<small>1 leçon</small></span>
+            <span class="chev" aria-hidden="true"></span>
+          </summary>
+          <div class="lesson">
+            <div class="lesson-row">
+              <span class="tag">2.1</span>
+              <p class="todo">Contenu de la leçon à intégrer.</p>
+            </div>
+          </div>
+        </details>
+
+        <details class="module card">
+          <summary>
+            <span class="num">3</span>
+            <span class="m-title">Séquence 3 — Usages et risques en SHS<small>1 leçon</small></span>
+            <span class="chev" aria-hidden="true"></span>
+          </summary>
+          <div class="lesson">
+            <div class="lesson-row">
+              <span class="tag">3.1</span>
+              <p class="todo">Contenu de la leçon à intégrer.</p>
+            </div>
+          </div>
+        </details>
+
+        <details class="module card">
+          <summary>
+            <span class="num">4</span>
+            <span class="m-title">Séquence 4 — La bibliographie qui n’existait pas<small>1 leçon</small></span>
+            <span class="chev" aria-hidden="true"></span>
+          </summary>
+          <div class="lesson">
+            <div class="lesson-row">
+              <span class="tag">4.1</span>
+              <p class="todo">Contenu de la leçon à intégrer.</p>
+            </div>
+          </div>
+        </details>
+
+        <details class="module card">
+          <summary>
+            <span class="num">5</span>
+            <span class="m-title">Séquence 5 — Évaluation et transfert<small>1 leçon</small></span>
+            <span class="chev" aria-hidden="true"></span>
+          </summary>
+          <div class="lesson">
+            <div class="lesson-row">
+              <span class="tag">5.1</span>
+              <p class="todo">Contenu de la leçon à intégrer.</p>
+            </div>
+          </div>
+        </details>
+
+      </div>
+    </section>
+
+    <section id="competences">
+      <h2>Compétences et connaissances</h2>
+      <ul class="skills">
+        <li>Culture de l’IA générative</li>
+        <li>Usages de l’IA en SHS</li>
+        <li>Vérification des sources</li>
+        <li>Analyse critique</li>
+        <li>Intégrité scientifique</li>
+        <li>Protection des données</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>© EdPedago — Parcours « L’IA générative en SHS ».</footer>
+</div>
+</body>
+</html>
